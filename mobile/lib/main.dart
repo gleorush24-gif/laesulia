@@ -10,7 +10,7 @@ void main() {
   runApp(const ProviderScope(child: LaesuliaApp()));
 }
 
-const kApiBase = 'http://localhost:8081';
+const kApiBase = 'https://laesulia-api.onrender.com';
 
 final _router = GoRouter(
   initialLocation: '/login',

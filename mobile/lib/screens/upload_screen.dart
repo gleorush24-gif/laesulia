@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/auth_provider.dart';
 import '../providers/bounties_provider.dart';
 
-const _apiBase = 'http://localhost:8081';
+const _apiBase = 'https://laesulia-api.onrender.com';
 
 class UploadScreen extends ConsumerStatefulWidget {
   final Bounty bounty;

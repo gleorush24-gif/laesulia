@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import '../providers/auth_provider.dart';
 
-const _apiBase = 'http://localhost:8081';
+const _apiBase = 'https://laesulia-api.onrender.com';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

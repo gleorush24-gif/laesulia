@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'auth_provider.dart';
 
-const _apiBase = "http://localhost:8081";
+const _apiBase = "https://laesulia-api.onrender.com";
 
 class WanLocation {
   final String id;

@@ -317,7 +317,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (token == null) return;
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:8081/api/v1/bounties'),
+        Uri.parse('https://laesulia-api.onrender.com/api/v1/bounties'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({'title': title, 'description': description,
           'lat': lat, 'lng': lng, 'reward_sbd': reward, 'submit_type': 'both'}),
