@@ -1,0 +1,61 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: laesulia_db
+    environment:
+      POSTGRES_USER: laesulia
+      POSTGRES_PASSWORD: laesulia
+      POSTGRES_DB: laesulia
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U laesulia"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: laesulia_redis
+    ports:
+      - "6380:6379"
+
+  api:
+    build:
+      context: ./backend-go
+      dockerfile: Dockerfile
+    container_name: laesulia_api
+    ports:
+      - "8081:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: laesulia
+      DB_PASSWORD: laesulia
+      DB_NAME: laesulia
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN}
+      PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  geocoder:
+    build:
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: laesulia_geocoder
+    ports:
+      - "8002:8000"
+    environment:
+      MAPBOX_TOKEN: ${MAPBOX_TOKEN}
+      LAESULIA_API_URL: http://api:8080
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:
