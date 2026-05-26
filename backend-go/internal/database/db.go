@@ -9,15 +9,20 @@ import (
 )
 
 func Connect() (*sql.DB, error) {
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		getEnv("DB_HOST", "localhost"),
-		getEnv("DB_PORT", "5432"),
-		getEnv("DB_USER", "laesulia"),
-		getEnv("DB_PASSWORD", "laesulia"),
-		getEnv("DB_NAME", "laesulia"),
-		getEnv("DB_SSLMODE", "disable"),
-	)
+	// Render provides DATABASE_URL directly
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		// Fall back to individual env vars for local Docker
+		dsn = fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+			getEnv("DB_HOST", "localhost"),
+			getEnv("DB_PORT", "5432"),
+			getEnv("DB_USER", "laesulia"),
+			getEnv("DB_PASSWORD", "laesulia"),
+			getEnv("DB_NAME", "laesulia"),
+			getEnv("DB_SSLMODE", "disable"),
+		)
+	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -82,10 +87,8 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// MigrateBounty adds bounty job and wallet tables
 func MigrateBounty(db *sql.DB) error {
 	stmts := []string{
-		// Bounty jobs — pins you drop on the map
 		`CREATE TABLE IF NOT EXISTS bounty_jobs (
 			id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			title        TEXT NOT NULL,
@@ -104,12 +107,9 @@ func MigrateBounty(db *sql.DB) error {
 			approved_by  UUID REFERENCES users(id),
 			created_at   TIMESTAMPTZ DEFAULT NOW()
 		);`,
-		`CREATE INDEX IF NOT EXISTS bounty_jobs_geom_idx
-			ON bounty_jobs USING GIST(geom);`,
-		`CREATE INDEX IF NOT EXISTS bounty_jobs_status_idx
-			ON bounty_jobs(status);`,
+		`CREATE INDEX IF NOT EXISTS bounty_jobs_geom_idx ON bounty_jobs USING GIST(geom);`,
+		`CREATE INDEX IF NOT EXISTS bounty_jobs_status_idx ON bounty_jobs(status);`,
 
-		// Submissions — photos or videos tied to a job
 		`CREATE TABLE IF NOT EXISTS bounty_submissions (
 			id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			job_id     UUID NOT NULL REFERENCES bounty_jobs(id) ON DELETE CASCADE,
@@ -122,17 +122,15 @@ func MigrateBounty(db *sql.DB) error {
 			created_at TIMESTAMPTZ DEFAULT NOW()
 		);`,
 
-		// Wallets — one per user
 		`CREATE TABLE IF NOT EXISTS wallets (
-			id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			user_id        UUID UNIQUE NOT NULL REFERENCES users(id),
-			balance_sbd    NUMERIC(10,2) DEFAULT 0.00,
-			total_earned   NUMERIC(10,2) DEFAULT 0.00,
+			id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			user_id         UUID UNIQUE NOT NULL REFERENCES users(id),
+			balance_sbd     NUMERIC(10,2) DEFAULT 0.00,
+			total_earned    NUMERIC(10,2) DEFAULT 0.00,
 			total_withdrawn NUMERIC(10,2) DEFAULT 0.00,
-			updated_at     TIMESTAMPTZ DEFAULT NOW()
+			updated_at      TIMESTAMPTZ DEFAULT NOW()
 		);`,
 
-		// Wallet transactions — every credit recorded
 		`CREATE TABLE IF NOT EXISTS wallet_transactions (
 			id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			wallet_id   UUID NOT NULL REFERENCES wallets(id),
