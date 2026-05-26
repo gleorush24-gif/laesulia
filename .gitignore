@@ -1,0 +1,14 @@
+# Environment secrets
+.env
+
+# Go
+backend-go/laesulia-api
+
+# Flutter build
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# macOS
+.DS_Store
