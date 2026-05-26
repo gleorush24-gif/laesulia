@@ -1,7 +1,9 @@
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
@@ -11,6 +13,7 @@ import '../providers/bounties_provider.dart';
 import '../providers/auth_provider.dart';
 
 const _honiaraCenter = LatLng(-9.4313, 160.0521);
+const _apiBase = 'https://laesulia-api.onrender.com';
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -143,6 +146,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                   else
                     Text('${locState.locations.length} places', style: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 12)),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () async {
+                      await ref.read(authProvider.notifier).logout();
+                      if (mounted) context.go('/login');
+                    },
+                    child: const Icon(Icons.logout, color: Colors.grey, size: 18),
+                  ),
                 ]),
               ),
             ),
@@ -163,7 +174,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     const Icon(Icons.touch_app, color: Colors.white, size: 18),
                     const SizedBox(width: 8),
-                    Text('Tap map to drop bounty pin', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text('Tap map to drop bounty pin',
+                      style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w600)),
                     const SizedBox(width: 12),
                     GestureDetector(
                       onTap: () => setState(() => _bountyDropMode = false),
@@ -178,7 +190,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // Add location pin
           FloatingActionButton(
             heroTag: "add",
             backgroundColor: const Color(0xFF0066CC),
@@ -186,7 +197,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: const Icon(Icons.add_location_alt, color: Colors.white),
           ),
           const SizedBox(height: 8),
-          // Drop bounty pin
           FloatingActionButton(
             heroTag: "bounty",
             backgroundColor: _bountyDropMode ? Colors.red : Colors.white,
@@ -195,7 +205,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               color: _bountyDropMode ? Colors.white : Colors.red),
           ),
           const SizedBox(height: 8),
-          // Zoom in
           FloatingActionButton.small(
             heroTag: "zoom_in",
             backgroundColor: Colors.white,
@@ -203,7 +212,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             child: const Icon(Icons.add, color: Color(0xFF0066CC)),
           ),
           const SizedBox(height: 4),
-          // Zoom out
           FloatingActionButton.small(
             heroTag: "zoom_out",
             backgroundColor: Colors.white,
@@ -228,8 +236,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         builder: (context, setModalState) => Container(
           decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
           padding: EdgeInsets.only(
             top: 16, left: 20, right: 20,
             bottom: MediaQuery.of(context).viewInsets.bottom + 24),
@@ -261,8 +268,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 controller: descCtrl,
                 decoration: InputDecoration(
                   labelText: 'Instructions for field worker',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
               ),
               const SizedBox(height: 12),
               Row(children: [
@@ -271,8 +277,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 DropdownButton<double>(
                   value: reward,
                   items: [5.0, 8.0, 10.0, 15.0].map((v) =>
-                    DropdownMenuItem(value: v, child: Text('\$$v SBD',
-                      style: GoogleFonts.outfit()))).toList(),
+                    DropdownMenuItem(value: v, child: Text('\$$v SBD', style: GoogleFonts.outfit()))).toList(),
                   onChanged: (v) => setModalState(() => reward = v!),
                 ),
               ]),
@@ -282,18 +287,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
+                    padding: const EdgeInsets.symmetric(vertical: 14)),
                   onPressed: () async {
                     if (titleCtrl.text.trim().isEmpty) return;
                     Navigator.pop(context);
                     await _createBounty(
-                      title:       titleCtrl.text.trim(),
+                      title: titleCtrl.text.trim(),
                       description: descCtrl.text.trim(),
-                      lat:         lat,
-                      lng:         lng,
-                      reward:      reward,
-                    );
+                      lat: lat, lng: lng, reward: reward);
                   },
                   child: Text('🎯 Drop Bounty Pin',
                     style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 15)),
@@ -317,7 +318,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (token == null) return;
     try {
       final response = await http.post(
-        Uri.parse('https://laesulia-api.onrender.com/api/v1/bounties'),
+        Uri.parse('$_apiBase/api/v1/bounties'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({'title': title, 'description': description,
           'lat': lat, 'lng': lng, 'reward_sbd': reward, 'submit_type': 'both'}),
@@ -425,7 +426,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         builder: (_) => UploadScreen(bounty: bounty)));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('❌ Already claimed.'),
+                        content: const Text('❌ Already claimed.'),
                         backgroundColor: Colors.red,
                         behavior: SnackBarBehavior.floating));
                     }

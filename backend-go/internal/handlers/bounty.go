@@ -302,3 +302,9 @@ func (h *BountyHandler) GetFiles(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"files": files})
 }
+
+func (h *BountyHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+	h.db.Exec(`DELETE FROM bounty_jobs WHERE id = $1`, id)
+	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
+}

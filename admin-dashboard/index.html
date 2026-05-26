@@ -184,7 +184,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'http://localhost:8081/api/v1';
+const API = 'https://laesulia-api.onrender.com/api/v1';
 let token = localStorage.getItem('laesulia_token');
 
 window.onload = () => { if (token) showApp(); };
@@ -359,6 +359,7 @@ async function approveBounty(id) {
 
 async function deleteBounty(id) {
   if (!confirm('Delete this bounty?')) return;
+  const data = await api(`/bounties/${id}`, { method: 'DELETE' });
   toast('🗑️ Bounty deleted');
   loadBounties();
 }
@@ -394,7 +395,7 @@ async function viewFiles(id, title) {
   if (!data?.files?.length) { alert('No files yet'); return; }
   const imgs = data.files.map(f =>
     f.file_type === 'photo'
-      ? `<img src="http://localhost:8081${f.url}" alt="photo" onerror="this.src='https://placehold.co/200x120?text=Photo'">`
+      ? `<img src="https://laesulia-api.onrender.com${f.url}" alt="photo" onerror="this.src='https://placehold.co/200x120?text=Photo'">`
       : `<div style="background:#1a202c;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;color:white">🎥 Video</div>`
   ).join('');
   alert(`${title}\n\n${data.files.length} file(s) submitted.\nCheck browser console for file URLs.`);
