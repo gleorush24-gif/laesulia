@@ -464,7 +464,15 @@ async function createBounty() {
   const type = document.getElementById('b-type').value;
   if (!title || !lat || !lng) { toast('⚠️ Title, Lat and Lng are required'); return; }
   const data = await api('/bounties', { method:'POST', body: JSON.stringify({title, description:desc, lat, lng, reward_sbd:reward, submit_type:type}) });
-  if (data?.id) { toast('🎯 Bounty pin dropped!'); renderBounties(); }
+  if (data?.id) {
+    toast('🎯 Bounty pin dropped!');
+    document.getElementById('b-title').value = '';
+    document.getElementById('b-desc').value = '';
+    document.getElementById('drop-coords').textContent = 'Click the map to drop another pin';
+    document.getElementById('drop-coords').style.color = 'var(--gray-400)';
+    if(window._adminMarker) { window._adminMap.removeLayer(window._adminMarker); window._adminMarker = null; }
+    loadBountiesList();
+  }
   else toast('❌ ' + (data?.error || 'Failed'));
 }
 
@@ -683,14 +691,16 @@ function initDropMap() {
   if(typeof L === 'undefined') { setTimeout(initDropMap, 200); return; }
   var el = document.getElementById('drop-map');
   if(!el || el._leaflet_id) return;
-  var dm = L.map('drop-map').setView([-9.4313,160.0521],13);
+  window._adminMap = L.map('drop-map').setView([-9.4313,160.0521],13);
+  var dm = window._adminMap;
   var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19});
   var labels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19,opacity:0.9});
   var streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19});
   satellite.addTo(dm);
   labels.addTo(dm);
   L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets},{},{ position:'topright'}).addTo(dm);
-  var dmk = null;
+  window._adminMarker = null;
+  var dmk = window._adminMarker;
   fetch('https://laesulia-api.onrender.com/api/v1/bounties?lat=-9.4313&lng=160.0521&radius=100000',{headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
     if(!d||!d.bounties) return;
     d.bounties.forEach(function(b){
@@ -705,9 +715,17 @@ function initDropMap() {
     document.getElementById('b-lng').value=lng;
     document.getElementById('drop-coords').textContent='📍 '+lat+', '+lng;
     document.getElementById('drop-coords').style.color='#16a34a';
-    if(dmk) dm.removeLayer(dmk);
-    dmk=L.marker([lat,lng]).addTo(dm);
+    if(window._adminMarker) window._adminMap.removeLayer(window._adminMarker);
+    window._adminMarker=L.marker([lat,lng]).addTo(window._adminMap);
+    dmk=window._adminMarker;
   });
+}
+
+async function loadBountiesList() {
+  const data = await api('/bounties?lat=-9.4313&lng=160.0521&radius=100000');
+  if (!data?.bounties?.length) { document.getElementById('bounties-list').innerHTML = '<div class="empty">No bounties yet</div>'; return; }
+  const rows = data.bounties.map(b => `<tr><td><strong>${b.title}</strong></td><td style="color:var(--gray-400);font-size:13px">${b.lat.toFixed(4)}, ${b.lng.toFixed(4)}</td><td><strong>$${b.reward_sbd} SBD</strong></td><td>${b.submit_type}</td><td>${statusBadge(b.status)}</td><td><div style="display:flex;gap:6px">${b.status==='submitted'?`<button class="btn btn-green btn-sm" onclick="approve('${b.id}')">✅ Pay</button>`:''}<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteBounty('${b.id}')">🗑</button></div></td></tr>`).join('');
+  document.getElementById('bounties-list').innerHTML = `<table><thead><tr><th>Title</th><th>Location</th><th>Reward</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 </script>
 </body>
