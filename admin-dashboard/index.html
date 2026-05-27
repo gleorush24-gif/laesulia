@@ -170,6 +170,7 @@ async function api(path,options={}){
 }
 function navigate(view){
   currentView=view;
+  adminMap = null; adminMarker = null;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const navEl=document.getElementById('nav-'+view);
   if(navEl) navEl.classList.add('active');
@@ -206,16 +207,22 @@ async function renderDashboard(){
 async function renderBounties(){
   document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="document.getElementById('b-title').focus()">+ New Pin</button>`;
   document.getElementById('content').innerHTML=`
-    <div class="drop-card"><h2>🎯 Drop a New Bounty Pin</h2>
+    <div class="drop-card">
+      <h2>🎯 Drop a New Bounty Pin</h2>
+      <p style="font-size:13px;color:var(--gray-400);margin-bottom:12px">Click anywhere on the map to place a pin, then fill in the details below.</p>
+      <div id="admin-map" style="height:380px;border-radius:10px;border:1px solid var(--gray-200);margin-bottom:16px"></div>
+      <div id="pin-coords" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#1e40af">
+        📍 Pin placed at <strong id="pin-lat-display"></strong>, <strong id="pin-lng-display"></strong> — fill in details below
+      </div>
       <div class="form-grid">
         <div><label class="form-label">Title *</label><input class="form-input" id="b-title" placeholder="e.g. Kukum Road Junction"></div>
         <div><label class="form-label">Reward (SBD)</label><input class="form-input" type="number" id="b-reward" value="5"></div>
-        <div><label class="form-label">Latitude *</label><input class="form-input" type="number" id="b-lat" placeholder="-9.4313" step="0.0001"></div>
-        <div><label class="form-label">Longitude *</label><input class="form-input" type="number" id="b-lng" placeholder="160.0521" step="0.0001"></div>
+        <input type="hidden" id="b-lat">
+        <input type="hidden" id="b-lng">
         <div class="form-full"><label class="form-label">Instructions</label><input class="form-input" id="b-desc" placeholder="What should the field worker photograph?"></div>
         <div><label class="form-label">Submit Type</label><select class="form-input" id="b-type"><option value="both">Both</option><option value="photos">Photos only</option><option value="videos">Videos only</option></select></div>
       </div>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="createBounty()">🎯 Drop Pin</button>
+      <button class="btn btn-primary" style="margin-top:16px" onclick="createBounty()" id="drop-btn" disabled>🎯 Click map to place pin first</button>
     </div>
     <div class="panel"><div class="panel-header"><h2>Active Bounty Pins</h2><button class="btn btn-ghost btn-sm" onclick="renderBounties()">Refresh</button></div>
     <div id="bounties-list"><div class="loading">Loading…</div></div></div>`;
