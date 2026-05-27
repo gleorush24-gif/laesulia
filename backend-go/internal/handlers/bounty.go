@@ -159,7 +159,9 @@ func (h *BountyHandler) UploadFile(c *gin.Context) {
 	log.Printf("id after form parse: %q", id2)
 
 	var claimedBy, status string
-	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,''), status FROM bounty_jobs WHERE id=$1`, id).
+	queryID := id2
+	log.Printf("Using queryID: %q len=%d", queryID, len(queryID))
+	err := h.db.QueryRow("SELECT COALESCE(claimed_by::text,''), status FROM bounty_jobs WHERE id::text=$1", queryID).
 		Scan(&claimedBy, &status)
 	log.Printf("Query result: claimedBy=%q status=%q err=%v", claimedBy, status, err)
 	if err != nil {
