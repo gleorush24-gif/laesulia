@@ -169,8 +169,8 @@ async function api(path,options={}){
   return res.json();
 }
 function navigate(view){
+  if (currentView === 'bounties' && adminMap) { adminMap.remove(); adminMap = null; adminMarker = null; }
   currentView=view;
-  adminMap = null; adminMarker = null;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const navEl=document.getElementById('nav-'+view);
   if(navEl) navEl.classList.add('active');
