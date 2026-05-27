@@ -158,6 +158,8 @@ func MigrateBase64(db *sql.DB) error {
 	return nil
 }
 func MigrateAdmin(db *sql.DB) error {
+	// Add is_admin column if not exists
+	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`)
 	_, err := db.Exec(`UPDATE users SET is_admin=true WHERE email='gordon@laesulia.app'`)
 	return err
 }
