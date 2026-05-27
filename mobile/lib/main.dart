@@ -15,13 +15,13 @@ const kApiBase = 'https://laesulia-api.onrender.com';
 final _router = GoRouter(
   initialLocation: '/login',
   routes: [
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     ShellRoute(
       builder: (context, state, child) => AppShell(child: child),
       routes: [
-        GoRoute(path: '/map',       builder: (context, state) => const MapScreen()),
-        GoRoute(path: '/places',    builder: (context, state) => const MapScreen()),
-        GoRoute(path: '/community', builder: (context, state) => const MapScreen()),
+        GoRoute(path: '/map',       builder: (_, _) => const MapScreen()),
+        GoRoute(path: '/places',    builder: (_, _) => const MapScreen()),
+        GoRoute(path: '/community', builder: (_, _) => const MapScreen()),
       ],
     ),
   ],

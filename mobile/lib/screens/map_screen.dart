@@ -324,7 +324,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           'lat': lat, 'lng': lng, 'reward_sbd': reward, 'submit_type': 'both'}),
       );
       if (response.statusCode == 201) {
-        ref.read(bountiesProvider.notifier).fetchNearby(lat: lat, lng: lng);
+        await ref.read(bountiesProvider.notifier).fetchNearby(lat: lat, lng: lng);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('🎯 Bounty pin dropped!', style: GoogleFonts.outfit()),
@@ -418,6 +418,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(vertical: 14)),
                 onPressed: () async {
+                  debugPrint('=== BOUNTY ID: "${bounty.id}" ===');
                   Navigator.pop(context);
                   final ok = await ref.read(bountiesProvider.notifier).claim(bounty.id);
                   if (mounted) {

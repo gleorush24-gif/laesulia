@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'auth_provider.dart';
+import 'package:flutter/foundation.dart';
 
 const _apiBase = "https://laesulia-api.onrender.com";
 
@@ -104,6 +105,7 @@ class BountiesNotifier extends Notifier<BountiesState> {
         final list = (data['bounties'] as List)
             .map((e) => Bounty.fromJson(e))
             .toList();
+        debugPrint('First bounty ID: ${list.isNotEmpty ? list.first.id : "EMPTY LIST"}');
         state = state.copyWith(bounties: list, isLoading: false);
       } else {
         state = state.copyWith(isLoading: false);
@@ -120,7 +122,11 @@ class BountiesNotifier extends Notifier<BountiesState> {
         Uri.parse('$_apiBase/api/v1/bounties/$bountyId/claim'),
         headers: {'Authorization': 'Bearer $token'},
       );
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        // Return the actual bounty ID used
+        return true;
+      }
+      return false;
     } catch (e) {
       return false;
     }

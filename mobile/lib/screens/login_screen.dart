@@ -10,7 +10,6 @@ const _apiBase = 'https://laesulia-api.onrender.com';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
-
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
@@ -34,9 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 30),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 30)],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,32 +46,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     const TextSpan(text: '"'),
                     TextSpan(text: 'to follow',
-                      style: GoogleFonts.outfit(
-                        color: const Color(0xFF0066CC), fontWeight: FontWeight.w600)),
+                      style: GoogleFonts.outfit(color: const Color(0xFF0066CC), fontWeight: FontWeight.w600)),
                     const TextSpan(text: '" — Toobaita, Malaita'),
                   ],
                 )),
                 const SizedBox(height: 32),
-                Text('Email',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 12,
-                    color: Colors.grey[600], letterSpacing: 0.5)),
+                Text('Email', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey[600], letterSpacing: 0.5)),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _emailCtrl,
                   decoration: InputDecoration(
                     hintText: 'your@email.com',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF0066CC), width: 2),
-                    ),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF0066CC), width: 2)),
                   ),
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
-                Text('Password',
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 12,
-                    color: Colors.grey[600], letterSpacing: 0.5)),
+                Text('Password', style: GoogleFonts.outfit(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey[600], letterSpacing: 0.5)),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _passwordCtrl,
@@ -82,10 +72,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: InputDecoration(
                     hintText: '••••••••',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF0066CC), width: 2),
-                    ),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF0066CC), width: 2)),
                   ),
                   onSubmitted: (_) => _login(),
                 ),
@@ -101,14 +89,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0066CC),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     child: _isLoading
                       ? const SizedBox(width: 20, height: 20,
                           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : Text('Sign In', style: GoogleFonts.outfit(
-                          color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
+                      : Text('Sign In', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -134,15 +120,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final res = await http.post(
         Uri.parse('$_apiBase/api/v1/auth/login'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email':    _emailCtrl.text.trim(),
-          'password': _passwordCtrl.text,
-        }),
+        body: jsonEncode({'email': _emailCtrl.text.trim(), 'password': _passwordCtrl.text}),
       );
       final data = jsonDecode(res.body);
       if (res.statusCode == 200) {
-        await ref.read(authProvider.notifier).setAuth(
-          data['token'], data['user_id'], data['username']);
+        await ref.read(authProvider.notifier).setAuth(data['token'], data['user_id'], data['username']);
         if (mounted) context.go('/map');
       } else {
         setState(() => _error = data['error'] ?? 'Login failed');
@@ -162,16 +144,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final res = await http.post(
         Uri.parse('$_apiBase/api/v1/auth/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'email':    email,
-          'password': _passwordCtrl.text,
-        }),
+        body: jsonEncode({'username': username, 'email': email, 'password': _passwordCtrl.text}),
       );
       final data = jsonDecode(res.body);
       if (res.statusCode == 201) {
-        await ref.read(authProvider.notifier).setAuth(
-          data['token'], data['user_id'], data['username']);
+        await ref.read(authProvider.notifier).setAuth(data['token'], data['user_id'], data['username']);
         if (mounted) context.go('/map');
       } else {
         setState(() => _error = data['error'] ?? 'Register failed');

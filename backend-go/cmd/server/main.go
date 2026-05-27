@@ -69,6 +69,7 @@ func main() {
 		// Admin bounty routes
 		api.POST("/bounties", bounty.Create)
 		api.POST("/bounties/:id/approve", bounty.Approve)
+		api.DELETE("/bounties/:id", bounty.Delete)
 		api.GET("/admin/bounties/submitted", bounty.GetSubmitted)
 		api.GET("/admin/bounties/:id/files", bounty.GetFiles)
 	}

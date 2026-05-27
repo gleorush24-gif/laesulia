@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../providers/auth_provider.dart';
 import '../providers/bounties_provider.dart';
 
+
 const _apiBase = 'https://laesulia-api.onrender.com';
 
 class UploadScreen extends ConsumerStatefulWidget {
@@ -203,6 +204,8 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
     try {
       final bytes   = await picked.readAsBytes();
       final token   = ref.read(authProvider).token;
+      debugPrint('UPLOAD URL: $_apiBase/api/v1/bounties/${widget.bounty.id}/upload');
+      
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('$_apiBase/api/v1/bounties/${widget.bounty.id}/upload'),

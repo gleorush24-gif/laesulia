@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"log"
 	"io"
 	"net/http"
 	"os"
@@ -146,6 +147,7 @@ func (h *BountyHandler) Submit(c *gin.Context) {
 func (h *BountyHandler) UploadFile(c *gin.Context) {
 	id     := c.Param("id")
 	userID := c.GetString("user_id")
+	log.Printf("UploadFile called: id=%q userID=%q", id, userID)
 
 	var claimedBy, status string
 	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,''), status FROM bounty_jobs WHERE id=$1`, id).
