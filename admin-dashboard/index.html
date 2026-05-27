@@ -407,7 +407,7 @@ async function renderBounties() {
         <div style="grid-column:1/-1">
           <label class="form-label">Click Map to Place Pin *</label>
           <div id="drop-map" style="height:300px;border-radius:8px;border:1.5px solid var(--gray-200);margin-bottom:4px"></div>
-          <script>setTimeout(initDropMap,300)<\/script>
+          
           <div id="drop-coords" style="font-size:12px;color:var(--gray-400)">Click the map to set coordinates</div>
         </div>
         <input type="hidden" id="b-lat">
@@ -668,6 +668,16 @@ function toast(msg) {
 
 function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 function scrollToDropForm() { document.getElementById('b-title')?.focus(); }
+
+// Watch for drop-map to appear
+var _mapObserver = new MutationObserver(function() {
+  var el = document.getElementById('drop-map');
+  if(el && !el._leaflet_id && typeof L !== 'undefined') {
+    _mapObserver.disconnect();
+    initDropMap();
+  }
+});
+_mapObserver.observe(document.body, {childList: true, subtree: true});
 
 function initDropMap() {
   if(typeof L === 'undefined') { setTimeout(initDropMap, 200); return; }
