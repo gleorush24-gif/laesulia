@@ -693,12 +693,10 @@ function initDropMap() {
   if(!el || el._leaflet_id) return;
   window._adminMap = L.map('drop-map').setView([-9.4313,160.0521],13);
   var dm = window._adminMap;
-  var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19});
-  var labels = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19,opacity:0.9});
-  var streets = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',maxZoom:19});
+  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{attribution:'© Google',maxZoom:21,maxNativeZoom:21});
+  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{attribution:'© Google',maxZoom:21,maxNativeZoom:21});
   satellite.addTo(dm);
-  labels.addTo(dm);
-  L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets},{},{ position:'topright'}).addTo(dm);
+  L.control.layers({'🛰️ Satellite+Labels': satellite, '🗺️ Streets': streets},{},{position:'topright'}).addTo(dm);
   window._adminMarker = null;
   var dmk = window._adminMarker;
   fetch('https://laesulia-api.onrender.com/api/v1/bounties?lat=-9.4313&lng=160.0521&radius=100000',{headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
