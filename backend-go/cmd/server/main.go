@@ -39,12 +39,6 @@ func main() {
 	r.POST("/api/v1/auth/register", auth.Register)
 	r.POST("/api/v1/auth/login", auth.Login)
 
-	r.GET("/make-admin", func(c *gin.Context) {
-		email := c.Query("email")
-		db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`)
-		db.Exec(`UPDATE users SET is_admin=true WHERE email=$1`, email)
-		c.JSON(200, gin.H{"message": "Done", "email": email})
-	})
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok", "service": "laesulia-api"})
 	})
