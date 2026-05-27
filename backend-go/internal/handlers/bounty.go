@@ -100,7 +100,7 @@ func (h *BountyHandler) Claim(c *gin.Context) {
 	userID := c.GetString("user_id")
 	result, err := h.db.Exec(`
 		UPDATE bounty_jobs SET status='claimed', claimed_by=$1, claimed_at=NOW()
-		WHERE id=$2 AND status='open'
+		WHERE id::text=$2 AND status='open'
 	`, userID, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Claim failed"})
@@ -130,7 +130,7 @@ func (h *BountyHandler) Submit(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&req)
 	var claimedBy string
-	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,'') FROM bounty_jobs WHERE id=$1`, id).Scan(&claimedBy)
+	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,'') FROM bounty_jobs WHERE id::text=$1`, id).Scan(&claimedBy)
 	if err != nil || claimedBy != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You have not claimed this bounty"})
 		return
@@ -140,7 +140,7 @@ func (h *BountyHandler) Submit(c *gin.Context) {
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
 			uuid.New().String(), id, userID, f.URL, f.FileType, f.FileSize, f.Lat, f.Lng)
 	}
-	h.db.Exec(`UPDATE bounty_jobs SET status='submitted', submitted_at=NOW() WHERE id=$1`, id)
+	h.db.Exec(`UPDATE bounty_jobs SET status='submitted', submitted_at=NOW() WHERE id::text=$1`, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Submitted! Waiting for admin review."})
 }
 
@@ -220,13 +220,13 @@ func (h *BountyHandler) Approve(c *gin.Context) {
 	adminID := c.GetString("user_id")
 	var claimedBy string
 	var rewardSBD float64
-	err := h.db.QueryRow(`SELECT claimed_by, reward_sbd FROM bounty_jobs WHERE id=$1 AND status='submitted'`, id).
+	err := h.db.QueryRow(`SELECT claimed_by, reward_sbd FROM bounty_jobs WHERE id::text=$1 AND status='submitted'`, id).
 		Scan(&claimedBy, &rewardSBD)
 	if err == sql.ErrNoRows {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Job not found or not submitted yet"})
 		return
 	}
-	h.db.Exec(`UPDATE bounty_jobs SET status='approved', approved_at=NOW(), approved_by=$1 WHERE id=$2`, adminID, id)
+	h.db.Exec(`UPDATE bounty_jobs SET status='approved', approved_at=NOW(), approved_by=$1 WHERE id::text=$2`, adminID, id)
 	var walletID string
 	h.db.QueryRow(`SELECT id FROM wallets WHERE user_id=$1`, claimedBy).Scan(&walletID)
 	h.db.Exec(`UPDATE wallets SET balance_sbd=balance_sbd+$1, total_earned=total_earned+$1, updated_at=NOW() WHERE user_id=$2`,
