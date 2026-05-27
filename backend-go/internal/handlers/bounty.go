@@ -149,6 +149,15 @@ func (h *BountyHandler) UploadFile(c *gin.Context) {
 	userID := c.GetString("user_id")
 	log.Printf("UploadFile called: id=%q userID=%q len=%d bytes=%v", id, userID, len(id), []byte(id))
 
+	// Parse multipart form BEFORE database query
+	if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
+		log.Printf("ParseMultipartForm error: %v", err)
+	}
+
+	// Re-read param after form parsing
+	id2 := c.Param("id")
+	log.Printf("id after form parse: %q", id2)
+
 	var claimedBy, status string
 	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,''), status FROM bounty_jobs WHERE id=$1`, id).
 		Scan(&claimedBy, &status)
