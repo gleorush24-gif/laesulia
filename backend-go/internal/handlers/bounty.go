@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"log"
+	"encoding/base64"
 	"io"
 	"net/http"
 	"os"
@@ -187,29 +188,24 @@ func (h *BountyHandler) UploadFile(c *gin.Context) {
 		fileType = "video"
 	}
 
-	uploadDir := "/app/uploads/" + id
-	os.MkdirAll(uploadDir, 0755)
-	filename := uuid.New().String() + "_" + header.Filename
-	filePath := uploadDir + "/" + filename
-	fileURL  := "/uploads/" + id + "/" + filename
-
-	dst, err := os.Create(filePath)
+	// Read file bytes and encode as base64
+	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read file"})
 		return
 	}
-	defer dst.Close()
-	io.Copy(dst, file)
+	b64 := "data:" + contentType + ";base64," + base64.StdEncoding.EncodeToString(fileBytes)
 
+	submissionID := uuid.New().String()
 	h.db.Exec(`INSERT INTO bounty_submissions (id,job_id,user_id,file_url,file_type,file_size)
 		VALUES ($1,$2,$3,$4,$5,$6)`,
-		uuid.New().String(), id, userID, fileURL, fileType, header.Size)
+		submissionID, id, userID, b64, fileType, header.Size)
 
 	var fileCount int
-	h.db.QueryRow(`SELECT COUNT(*) FROM bounty_submissions WHERE job_id=$1`, id).Scan(&fileCount)
+	h.db.QueryRow(`SELECT COUNT(*) FROM bounty_submissions WHERE job_id::text=$1`, id).Scan(&fileCount)
 
 	c.JSON(http.StatusOK, gin.H{
-		"file_url":   fileURL,
+		"file_url":   "/submissions/" + submissionID,
 		"file_type":  fileType,
 		"file_count": fileCount,
 		"message":    "File uploaded successfully",

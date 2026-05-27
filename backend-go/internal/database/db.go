@@ -149,3 +149,11 @@ func MigrateBounty(db *sql.DB) error {
 	}
 	return nil
 }
+
+func MigrateBase64(db *sql.DB) error {
+	_, err := db.Exec(`ALTER TABLE bounty_submissions ALTER COLUMN file_url TYPE TEXT`)
+	if err != nil {
+		return nil // ignore if already text
+	}
+	return nil
+}
