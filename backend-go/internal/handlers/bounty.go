@@ -152,6 +152,7 @@ func (h *BountyHandler) UploadFile(c *gin.Context) {
 	var claimedBy, status string
 	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,''), status FROM bounty_jobs WHERE id=$1`, id).
 		Scan(&claimedBy, &status)
+	log.Printf("Query result: claimedBy=%q status=%q err=%v", claimedBy, status, err)
 	if err != nil {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Bounty not found: " + err.Error()})
 		return
