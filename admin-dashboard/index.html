@@ -686,7 +686,7 @@ function initDropMap() {
   var dm = L.map('drop-map').setView([-9.4313,160.0521],13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(dm);
   var dmk = null;
-  apiFetch('/bounties?lat=-9.4313&lng=160.0521&radius=100000').then(function(d){
+  fetch('https://laesulia-api.onrender.com/api/v1/bounties?lat=-9.4313&lng=160.0521&radius=100000',{headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
     if(!d||!d.bounties) return;
     d.bounties.forEach(function(b){
       var c=b.status==='open'?'#dc2626':b.status==='claimed'?'#d97706':'#16a34a';
