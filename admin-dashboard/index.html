@@ -376,7 +376,7 @@ async function loadSubmissions() {
   const rows = data.jobs.map(j => `
     <tr>
       <td><strong>${j.title}</strong><br><span style="color:#718096;font-size:12px">by ${j.username}</span></td>
-      <td>${j.file_count} file(s)</td>
+      <td><span id="thumbs-${j.id}">Loading...</span></td>
       <td><strong>$${j.reward_sbd} SBD</strong></td>
       <td>${j.submit_type}</td>
       <td><div class="actions">
@@ -388,18 +388,86 @@ async function loadSubmissions() {
   document.getElementById('submissions-body').innerHTML = `
     <table><thead><tr><th>Job</th><th>Files</th><th>Reward</th><th>Type</th><th>Actions</th></tr></thead>
     <tbody>${rows}</tbody></table>`;
+  // Load thumbnails for each job
+  data.jobs.forEach(j => loadThumbs(j.id));
+}
+
+
+
+async function loadThumbs(jobId) {
+  const data = await api(`/admin/bounties/${jobId}/files`);
+  if (!data?.files?.length) {
+    document.getElementById('thumbs-' + jobId).innerHTML = '0 files';
+    return;
+  }
+  const thumbs = data.files.map((f, i) => {
+    const time = new Date(f.created_at).toLocaleString('en-AU', {
+      day:'2-digit', month:'short', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+    if (f.url.startsWith('data:image')) {
+      return `<div style="display:inline-block;margin-right:6px;text-align:center">
+        <img src="${f.url}" 
+          style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #e2e8f0;cursor:pointer"
+          title="${time}"
+          onclick="showFullPhoto('${f.url}','${time}')">
+        <div style="font-size:9px;color:#718096;margin-top:2px">${time}</div>
+      </div>`;
+    }
+    return `<div style="display:inline-block;margin-right:6px;text-align:center">
+      <div style="width:60px;height:60px;background:#1a202c;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer" title="${time}">🎥</div>
+      <div style="font-size:9px;color:#718096;margin-top:2px">${time}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('thumbs-' + jobId).innerHTML = thumbs;
+}
+
+function showFullPhoto(src, time) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer';
+  modal.innerHTML = `
+    <img src="${src}" style="max-width:90vw;max-height:80vh;border-radius:12px;object-fit:contain">
+    <div style="color:white;margin-top:12px;font-size:14px">🕐 ${time}</div>
+    <div style="color:#718096;margin-top:8px;font-size:13px">Click anywhere to close</div>`;
+  modal.addEventListener('click', () => modal.remove());
+  document.body.appendChild(modal);
 }
 
 async function viewFiles(id, title) {
   const data = await api(`/admin/bounties/${id}/files`);
-  if (!data?.files?.length) { alert('No files yet'); return; }
-  const imgs = data.files.map(f =>
-    f.file_type === 'photo'
-      ? `<img src="https://laesulia-api.onrender.com${f.url}" alt="photo" onerror="this.src='https://placehold.co/200x120?text=Photo'">`
-      : `<div style="background:#1a202c;border-radius:8px;height:120px;display:flex;align-items:center;justify-content:center;color:white">🎥 Video</div>`
-  ).join('');
-  alert(`${title}\n\n${data.files.length} file(s) submitted.\nCheck browser console for file URLs.`);
-  console.log('Files:', data.files);
+  if (!data?.files?.length) { alert('No files yet for this bounty.'); return; }
+
+  const filesHtml = data.files.map((f, i) => {
+    const time = new Date(f.created_at).toLocaleString();
+    const preview = f.url.startsWith('data:')
+      ? `<img src="${f.url}" style="width:100%;height:200px;object-fit:cover;border-radius:8px">`
+      : f.file_type === 'video'
+        ? `<div style="background:#1a202c;border-radius:8px;height:200px;display:flex;align-items:center;justify-content:center;color:white;font-size:48px">🎥</div>`
+        : `<img src="https://laesulia-api.onrender.com${f.url}" style="width:100%;height:200px;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='<div style=background:#f0f4f8;height:200px;display:flex;align-items:center;justify-content:center;border-radius:8px>📸 Photo ${i+1}</div>'">`;
+    return `
+      <div style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden">
+        ${preview}
+        <div style="padding:10px 12px;background:#f7fafc">
+          <div style="font-weight:600;font-size:13px">📸 File ${i+1} of ${data.files.length}</div>
+          <div style="color:#718096;font-size:12px;margin-top:2px">🕐 ${time}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:80vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2 style="font-size:18px;font-weight:700">📸 ${title}</h2>
+        <button onclick="this.closest('[style*=fixed]').remove()" 
+          style="background:#f0f4f8;border:none;border-radius:8px;padding:6px 12px;cursor:pointer">✕ Close</button>
+      </div>
+      <p style="color:#718096;font-size:13px;margin-bottom:16px">${data.files.length} file(s) in order:</p>
+      ${filesHtml}
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

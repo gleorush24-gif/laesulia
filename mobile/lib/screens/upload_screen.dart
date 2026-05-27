@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../providers/auth_provider.dart';
 import '../providers/bounties_provider.dart';
+import 'package:http_parser/http_parser.dart';
 
 
 const _apiBase = 'https://laesulia-api.onrender.com';
@@ -26,7 +27,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   bool _isSubmitting = false;
   String? _message;
 
-  int get _required => 3;
+  int get _required => 1;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +212,11 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         Uri.parse('$_apiBase/api/v1/bounties/${widget.bounty.id}/upload'),
       );
       request.headers['Authorization'] = 'Bearer $token';
-      request.files.add(http.MultipartFile.fromBytes('file', bytes, filename: picked.name));
+      request.files.add(http.MultipartFile.fromBytes(
+        'file', bytes,
+        filename: picked.name,
+        contentType: MediaType('image', 'jpeg'),
+      ));
 
       final response = await request.send();
       final body     = await response.stream.bytesToString();

@@ -157,3 +157,7 @@ func MigrateBase64(db *sql.DB) error {
 	}
 	return nil
 }
+func MigrateAdmin(db *sql.DB) error {
+	_, err := db.Exec(`UPDATE users SET is_admin=true WHERE email='gordon@laesulia.app'`)
+	return err
+}
