@@ -68,7 +68,7 @@ func (h *BountyHandler) List(c *gin.Context) {
 			geom::geography,
 			ST_SetSRID(ST_MakePoint($2, $1), 4326)::geography, $3
 		)
-		AND status IN ('open', 'claimed', 'submitted')
+		AND status IN ('open', 'claimed', 'submitted', 'approved')
 		ORDER BY created_at DESC
 	`, lat, lng, radius)
 	if err != nil {

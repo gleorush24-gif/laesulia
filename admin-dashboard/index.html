@@ -90,6 +90,7 @@
       <div class="tab active" onclick="switchTab('locations')">📍 Locations</div>
       <div class="tab" onclick="switchTab('bounties')">🎯 Bounties</div>
       <div class="tab" onclick="switchTab('submissions')">📸 Submissions</div>
+      <div class="tab" onclick="switchTab('approved')">✅ Approved</div>
     </div>
 
     <!-- Locations tab -->
@@ -161,6 +162,16 @@
           <button class="btn-ghost btn-sm" onclick="loadSubmissions()">Refresh</button>
         </div>
         <div id="submissions-body"><div class="loading">Loading…</div></div>
+      </div>
+    </div>
+  <!-- Approved tab -->
+    <div id="tab-approved" style="display:none">
+      <div class="results-panel">
+        <div class="results-header">
+          <h2>✅ Approved Submissions</h2>
+          <button class="btn-ghost btn-sm" onclick="loadApproved()">Refresh</button>
+        </div>
+        <div id="approved-body"><div class="loading">Loading…</div></div>
       </div>
     </div>
   </div>
@@ -243,13 +254,14 @@ async function api(path, options = {}) {
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['locations','bounties','submissions'].forEach(t => {
+  ['locations','bounties','submissions','approved'].forEach(t => {
     document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
   });
   document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', ['locations','bounties','submissions'][i] === name);
+    el.classList.toggle('active', ['locations','bounties','submissions','approved'][i] === name);
   });
   if (name === 'submissions') loadSubmissions();
+  if (name === 'approved') loadApproved();
   if (name === 'bounties') loadBounties();
 }
 
@@ -468,6 +480,50 @@ async function viewFiles(id, title) {
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+// ── Approved ─────────────────────────────────────────────────────────────────
+async function loadApproved() {
+  document.getElementById('approved-body').innerHTML = '<div class="loading">Loading…</div>';
+  const data = await api('/bounties?lat=-9.4313&lng=160.0521&radius=100000');
+  const approved = data?.bounties?.filter(b => b.status === 'approved') || [];
+  if (!approved.length) {
+    document.getElementById('approved-body').innerHTML = '<div class="empty">No approved submissions yet</div>';
+    return;
+  }
+  const rows = approved.map(j => `
+    <tr>
+      <td><strong>${j.title}</strong></td>
+      <td><span id="approved-thumbs-${j.id}">Loading...</span></td>
+      <td><strong>$${j.reward_sbd} SBD</strong></td>
+      <td><span class="badge-green">✅ approved</span></td>
+      <td><button class="btn-ghost btn-sm" onclick="viewFiles('${j.id}','${esc(j.title)}')">👁 View Files</button></td>
+    </tr>
+  `).join('');
+  document.getElementById('approved-body').innerHTML = `
+    <table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  approved.forEach(j => loadApprovedThumbs(j.id));
+}
+
+async function loadApprovedThumbs(jobId) {
+  const data = await api(`/admin/bounties/${jobId}/files`);
+  const el = document.getElementById('approved-thumbs-' + jobId);
+  if (!el) return;
+  if (!data?.files?.length) { el.innerHTML = '0 files'; return; }
+  const thumbs = data.files.map((f, i) => {
+    const time = new Date(f.created_at).toLocaleString('en-AU', {
+      day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+    });
+    if (f.url.startsWith('data:image')) {
+      return `<div style="display:inline-block;margin-right:6px;text-align:center">
+        <img src="${f.url}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #c6f6d5;cursor:pointer" title="${time}" onclick="showFullPhoto('${f.url}','${time}')">
+        <div style="font-size:9px;color:#718096;margin-top:2px">${time}</div>
+      </div>`;
+    }
+    return '';
+  }).join('');
+  el.innerHTML = thumbs;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
