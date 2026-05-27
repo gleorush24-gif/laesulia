@@ -86,6 +86,8 @@
     .drop-card { background:white; border-radius:12px; border:1px solid var(--gray-200); padding:24px; margin-bottom:24px; }
     .drop-card h2 { font-size:15px; font-weight:600; margin-bottom:18px; }
   </style>
+  <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'>
+  <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'><\/script>
 </head>
 <body>
 <div id="login-screen">
@@ -204,7 +206,43 @@ async function renderDashboard(){
   document.getElementById('dash-submissions').innerHTML=`<table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table>`;
   sd.jobs.slice(0,5).forEach(j=>loadThumbs(j.id,'dash-thumbs-'));
 }
-async function renderBounties(){
+
+  // ── Admin Map ─────────────────────────────────────────────────────────────
+  let _adminMap = null;
+  let _adminMarker = null;
+
+  function initAdminMap() {
+    if (_adminMap) { _adminMap.remove(); _adminMap = null; }
+    const el = document.getElementById('admin-map');
+    if (!el) return;
+    _adminMap = L.map('admin-map', {center: [-9.4313, 160.0521], zoom: 13});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(_adminMap);
+
+    // Show existing bounties
+    apiFetch('/bounties?lat=-9.4313&lng=160.0521&radius=100000').then(data => {
+      (data?.bounties || []).forEach(b => {
+        const c = b.status==='open'?'#dc2626':b.status==='claimed'?'#d97706':'#16a34a';
+        L.circleMarker([b.lat,b.lng],{radius:8,fillColor:c,color:'white',weight:2,fillOpacity:0.9})
+          .addTo(_adminMap).bindPopup('<b>'+b.title+'</b><br>'+b.status+' — $'+b.reward_sbd+' SBD');
+      });
+    });
+
+    // Click to drop pin
+    _adminMap.on('click', function(e) {
+      const lat = e.latlng.lat.toFixed(5);
+      const lng = e.latlng.lng.toFixed(5);
+      document.getElementById('b-lat').value = lat;
+      document.getElementById('b-lng').value = lng;
+      document.getElementById('pin-display').textContent = lat + ', ' + lng;
+      document.getElementById('pin-info').style.display = 'block';
+      if (_adminMarker) _adminMap.removeLayer(_adminMarker);
+      _adminMarker = L.marker([lat, lng]).addTo(_adminMap);
+    });
+  }
+
+  async function renderBounties(){
   document.getElementById('topbar-actions').innerHTML=`<button class="btn btn-primary btn-sm" onclick="document.getElementById('b-title').focus()">+ New Pin</button>`;
   document.getElementById('content').innerHTML=`
     <div class="drop-card">
