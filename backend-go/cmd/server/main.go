@@ -41,12 +41,13 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok", "service": "laesulia-api"})
 	})
 
-	// Public — anyone can read locations (no login needed)
-	loc := handlers.NewLocationHandler(db)
+	// Handlers
+	loc    := handlers.NewLocationHandler(db)
+	bounty := handlers.NewBountyHandler(db)
+
+	// Public — no login needed
 	r.GET("/api/v1/locations", loc.List)
 	r.GET("/api/v1/locations/:id", loc.Get)
-	// Public bounties — anyone can see open bounty pins
-	bounty := handlers.NewBountyHandler(db)
 	r.GET("/api/v1/bounties", bounty.List)
 
 	// Protected — must be logged in
@@ -59,19 +60,17 @@ func main() {
 		api.POST("/locations/:id/upvote", loc.Upvote)
 
 		// Bounties
-		bounty := handlers.NewBountyHandler(db)
+		api.POST("/bounties/:id/claim",   bounty.Claim)
+		api.POST("/bounties/:id/submit",  bounty.Submit)
+		api.POST("/bounties/:id/upload",  bounty.UploadFile)
+		api.GET("/wallet",                bounty.GetWallet)
 
-		api.POST("/bounties/:id/claim", bounty.Claim)
-		api.POST("/bounties/:id/submit", bounty.Submit)
-		api.POST("/bounties/:id/upload", bounty.UploadFile)
-		api.GET("/wallet", bounty.GetWallet)
-
-		// Admin bounty routes
-		api.POST("/bounties", bounty.Create)
-		api.POST("/bounties/:id/approve", bounty.Approve)
-		api.DELETE("/bounties/:id", bounty.Delete)
-		api.GET("/admin/bounties/submitted", bounty.GetSubmitted)
-		api.GET("/admin/bounties/:id/files", bounty.GetFiles)
+		// Admin
+		api.POST("/bounties",                    bounty.Create)
+		api.POST("/bounties/:id/approve",        bounty.Approve)
+		api.DELETE("/bounties/:id",              bounty.Delete)
+		api.GET("/admin/bounties/submitted",     bounty.GetSubmitted)
+		api.GET("/admin/bounties/:id/files",     bounty.GetFiles)
 	}
 
 	port := os.Getenv("PORT")
