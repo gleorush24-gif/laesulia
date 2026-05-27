@@ -685,7 +685,7 @@ function initDropMap() {
   if(!el || el._leaflet_id) return;
   var dm = L.map('drop-map').setView([-9.4313,160.0521],13);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri'}).addTo(dm);
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{opacity:1}).addTo(dm);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png',{attribution:'© CartoDB',opacity:0.8}).addTo(dm);
   var dmk = null;
   fetch('https://laesulia-api.onrender.com/api/v1/bounties?lat=-9.4313&lng=160.0521&radius=100000',{headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
     if(!d||!d.bounties) return;
