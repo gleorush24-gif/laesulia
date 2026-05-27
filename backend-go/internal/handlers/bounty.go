@@ -119,6 +119,7 @@ func (h *BountyHandler) Claim(c *gin.Context) {
 func (h *BountyHandler) Submit(c *gin.Context) {
 	id     := c.Param("id")
 	userID := c.GetString("user_id")
+	log.Printf("Submit called: id=%q userID=%q", id, userID)
 	var req struct {
 		Files []struct {
 			URL      string  `json:"url"`
