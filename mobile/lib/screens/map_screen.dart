@@ -71,7 +71,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                 userAgentPackageName: 'com.laesulia.app',
               ),
               MarkerLayer(
