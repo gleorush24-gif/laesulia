@@ -693,6 +693,7 @@ function initDropMap() {
       L.circleMarker([b.lat,b.lng],{radius:8,fillColor:c,color:'white',weight:2,fillOpacity:0.9}).addTo(dm).bindPopup('<b>'+b.title+'</b><br>$'+b.reward_sbd+' SBD');
     });
   });
+  setTimeout(function(){ dm.invalidateSize(); }, 100);
   dm.on('click',function(e){
     var lat=e.latlng.lat.toFixed(5), lng=e.latlng.lng.toFixed(5);
     document.getElementById('b-lat').value=lat;
