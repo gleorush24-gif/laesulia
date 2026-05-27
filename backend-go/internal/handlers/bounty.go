@@ -23,6 +23,12 @@ func NewBountyHandler(db *sql.DB) *BountyHandler {
 
 func (h *BountyHandler) Create(c *gin.Context) {
 	userID := c.GetString("user_id")
+	var isAdmin bool
+	h.db.QueryRow("SELECT is_admin FROM users WHERE id::text=$1", userID).Scan(&isAdmin)
+	if !isAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can create bounties"})
+		return
+	}
 	var req struct {
 		Title       string  `json:"title"       binding:"required"`
 		Description string  `json:"description"`
