@@ -131,7 +131,7 @@ func (h *BountyHandler) Submit(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&req)
 	var claimedBy string
-	err := h.db.QueryRow(`SELECT COALESCE(claimed_by,'') FROM bounty_jobs WHERE id::text=$1`, id).Scan(&claimedBy)
+	err := h.db.QueryRow(`SELECT COALESCE(claimed_by::text,'') FROM bounty_jobs WHERE id::text=$1`, id).Scan(&claimedBy)
 	if err != nil || claimedBy != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You have not claimed this bounty"})
 		return
