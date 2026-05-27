@@ -328,7 +328,7 @@ async function renderMap() {
 
   mapInstance = L.map('map').setView([-9.4313, 160.0521], 13);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '© Esri', userAgentPackageName: 'com.laesulia.app'
+    attribution: '© Google', maxZoom: 21, maxNativeZoom: 21, userAgentPackageName: 'com.laesulia.app'
   }).addTo(mapInstance);
 
   const data = await apiFetch('/bounties?lat=-9.4313&lng=160.0521&radius=50000');
