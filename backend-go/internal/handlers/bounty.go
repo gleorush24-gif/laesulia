@@ -315,3 +315,4 @@ func (h *BountyHandler) Delete(c *gin.Context) {
 	h.db.Exec(`DELETE FROM bounty_jobs WHERE id = $1`, id)
 	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
 }
+// force redeploy Wed May 27 15:32:52 AEST 2026
