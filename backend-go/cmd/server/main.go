@@ -29,7 +29,6 @@ func main() {
 		database.MigrateBase64(db)
 		database.MigrateAdmin(db)
 	database.MigratePhone(db)
-	database.MigratePhone(db) // ← add this line
 		log.Fatalf("Failed to run bounty migrations: %v", err)
 	}
 
