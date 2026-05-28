@@ -165,7 +165,11 @@ func MigrateAdmin(db *sql.DB) error {
 }
 
 func MigratePhone(db *sql.DB) error {
-	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''`)
+	_, err := db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''`)
+	if err != nil {
+		log.Printf("MigratePhone error: %v", err)
+	}
+	log.Printf("MigratePhone completed")
 	return nil
 }
 
