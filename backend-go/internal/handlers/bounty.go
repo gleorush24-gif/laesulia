@@ -275,6 +275,7 @@ func (h *BountyHandler) GetSubmitted(c *gin.Context) {
 		SubmitType  string    `json:"submit_type"`
 		SubmittedAt time.Time `json:"submitted_at"`
 		Username    string    `json:"username"`
+		Phone       string    `json:"phone"`
 		FileCount   int       `json:"file_count"`
 	}
 	jobs := []Job{}
@@ -282,7 +283,7 @@ func (h *BountyHandler) GetSubmitted(c *gin.Context) {
 		var j Job
 		var submittedAt sql.NullTime
 		rows.Scan(&j.ID, &j.Title, &j.Lat, &j.Lng, &j.RewardSBD, &j.SubmitType,
-			&submittedAt, &j.Username, &j.FileCount)
+			&submittedAt, &j.Username, &j.Phone, &j.FileCount)
 		if submittedAt.Valid { j.SubmittedAt = submittedAt.Time }
 		jobs = append(jobs, j)
 	}

@@ -163,3 +163,13 @@ func MigrateAdmin(db *sql.DB) error {
 	_, err := db.Exec(`UPDATE users SET is_admin=true WHERE email='gordon@laesulia.app'`)
 	return err
 }
+
+func MigratePhone(db *sql.DB) error {
+	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''`)
+	return nil
+}
+
+func MigratePhone(db *sql.DB) error {
+	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''`)
+	return nil
+}

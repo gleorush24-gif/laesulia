@@ -24,6 +24,7 @@ type registerRequest struct {
 	Username string `json:"username" binding:"required,min=3"`
 	Email    string `json:"email"    binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
+	Phone    string `json:"phone"`
 }
 
 type loginRequest struct {
@@ -44,8 +45,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 	id := uuid.New().String()
 	_, err = h.db.Exec(
-		`INSERT INTO users (id, username, email, password) VALUES ($1, $2, $3, $4)`,
-		id, req.Username, req.Email, string(hash),
+		`INSERT INTO users (id, username, email, password, phone) VALUES ($1, $2, $3, $4, $5)`,
+		id, req.Username, req.Email, string(hash), req.Phone,
 	)
 	if err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Username or email already taken"})

@@ -27,7 +27,8 @@ func main() {
 	}
 	if err := database.MigrateBounty(db); err != nil {
 		database.MigrateBase64(db)
-		database.MigrateAdmin(db) // ← add this line
+		database.MigrateAdmin(db)
+	database.MigratePhone(db) // ← add this line
 		log.Fatalf("Failed to run bounty migrations: %v", err)
 	}
 
