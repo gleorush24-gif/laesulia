@@ -2,143 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Laesulia — Field Worker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laesulia Field Worker</title>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --navy: #0a1628; --blue: #0066cc; --green: #16a34a;
-      --red: #dc2626; --orange: #ea580c; --yellow: #d97706;
-      --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
-      --gray-400: #94a3b8; --gray-600: #475569; --gray-800: #1e293b;
+      --navy:#0a1628; --blue:#0066cc; --green:#16a34a; --red:#dc2626;
+      --orange:#ea580c; --yellow:#d97706;
+      --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0;
+      --gray-400:#94a3b8; --gray-600:#475569; --gray-800:#1e293b;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Outfit', sans-serif; background: var(--gray-50); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    body { font-family:'Outfit',sans-serif; background:var(--gray-50); min-height:100vh; color:var(--gray-800); }
 
-    /* ── Auth screens ── */
-    .auth-screen { display: none; min-height: 100vh; background: var(--navy); align-items: center; justify-content: center; padding: 24px; flex-direction: column; }
-    .auth-screen.active { display: flex; }
-    .auth-logo { text-align: center; margin-bottom: 32px; }
-    .auth-logo h1 { font-family: 'Fraunces', serif; font-size: 32px; color: white; font-weight: 700; }
-    .auth-logo p { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 4px; }
-    .auth-logo span { color: #60a5fa; font-weight: 600; }
-    .auth-card { background: white; border-radius: 20px; padding: 32px; width: 100%; max-width: 400px; }
-    .auth-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-    .field { margin-bottom: 14px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-600); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .field input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 15px; font-family: 'Outfit', sans-serif; outline: none; }
-    .field input:focus { border-color: var(--blue); }
-    .btn-full { width: 100%; padding: 14px; background: var(--blue); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; margin-top: 8px; }
-    .btn-full.green { background: var(--green); }
-    .auth-switch { text-align: center; margin-top: 16px; font-size: 14px; color: var(--gray-600); }
-    .auth-switch a { color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: none; }
-    .auth-error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+    /* ── Auth ── */
+    .auth-screen { display:none; min-height:100vh; background:var(--navy); align-items:center; justify-content:center; padding:24px; flex-direction:column; }
+    .auth-screen.active { display:flex; }
+    .auth-logo { text-align:center; margin-bottom:28px; }
+    .auth-logo h1 { font-family:'Fraunces',serif; font-size:32px; color:white; font-weight:700; }
+    .auth-logo p { color:rgba(255,255,255,0.5); font-size:14px; margin-top:4px; }
+    .auth-logo span { color:#60a5fa; font-weight:600; }
+    .auth-card { background:white; border-radius:20px; padding:32px; width:100%; max-width:400px; }
+    .auth-card h2 { font-size:20px; font-weight:700; margin-bottom:18px; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; font-size:11px; font-weight:700; color:var(--gray-600); margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px; }
+    .field input { width:100%; padding:12px 14px; border:1.5px solid var(--gray-200); border-radius:10px; font-size:15px; font-family:'Outfit',sans-serif; outline:none; }
+    .field input:focus { border-color:var(--blue); }
+    .btn-full { width:100%; padding:14px; background:var(--blue); color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; font-family:'Outfit',sans-serif; cursor:pointer; margin-top:8px; }
+    .btn-full.green { background:var(--green); }
+    .auth-switch { text-align:center; margin-top:14px; font-size:14px; color:var(--gray-600); }
+    .auth-switch a { color:var(--blue); font-weight:600; cursor:pointer; }
+    .auth-error { color:var(--red); font-size:13px; margin-top:8px; display:none; }
 
     /* ── App ── */
-    #app { display: none; }
+    #app { display:none; min-height:100vh; flex-direction:column; }
 
-    /* ── Top bar ── */
-    .topbar { background: var(--navy); color: white; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .topbar-left h1 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; }
-    .topbar-left p { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 1px; }
-    .wallet-chip { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: 600; color: white; cursor: pointer; }
-
-    /* ── Bottom nav ── */
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: white; border-top: 1px solid var(--gray-200); display: flex; z-index: 100; }
-    .nav-btn { flex: 1; padding: 10px 0 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; border: none; background: none; font-family: 'Outfit', sans-serif; color: var(--gray-400); transition: color 0.15s; }
-    .nav-btn.active { color: var(--blue); }
-    .nav-btn .icon { font-size: 20px; }
-    .nav-btn .label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+    /* ── Navbar ── */
+    .navbar {
+      background:var(--navy); color:white;
+      padding:0 20px; height:54px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+      box-shadow:0 2px 12px rgba(0,0,0,0.2);
+    }
+    .navbar-brand { display:flex; align-items:center; gap:8px; }
+    .navbar-brand h1 { font-family:'Fraunces',serif; font-size:18px; font-weight:700; }
+    .navbar-links { display:flex; align-items:center; gap:2px; }
+    .nav-link { padding:7px 11px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:500; color:rgba(255,255,255,0.6); border:none; background:none; font-family:'Outfit',sans-serif; white-space:nowrap; transition:all 0.15s; display:flex; align-items:center; gap:5px; }
+    .nav-link:hover { background:rgba(255,255,255,0.08); color:white; }
+    .nav-link.active { background:rgba(0,102,204,0.3); color:white; }
+    .navbar-right { display:flex; align-items:center; gap:8px; }
+    .wallet-chip { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:5px 11px; font-size:13px; font-weight:600; color:white; cursor:pointer; white-space:nowrap; }
+    .hamburger { display:none; background:none; border:none; cursor:pointer; color:white; font-size:22px; padding:4px; }
+    .mobile-menu { display:none; background:var(--navy); border-top:1px solid rgba(255,255,255,0.1); padding:8px 16px 16px; }
+    .mobile-menu.open { display:block; }
+    .mobile-nav-link { display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; cursor:pointer; font-size:15px; font-weight:500; color:rgba(255,255,255,0.7); margin-bottom:4px; border:none; background:none; font-family:'Outfit',sans-serif; width:100%; text-align:left; }
+    .mobile-nav-link:hover, .mobile-nav-link.active { background:rgba(0,102,204,0.25); color:white; }
+    .mobile-footer { padding:12px 14px; border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; display:flex; justify-content:space-between; align-items:center; }
+    .btn-signout { padding:6px 12px; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.12); border-radius:8px; font-size:12px; font-family:'Outfit',sans-serif; cursor:pointer; }
 
     /* ── Content ── */
-    .content { padding-bottom: 70px; }
+    .content { flex:1; }
 
     /* ── Map ── */
-    #map { height: calc(100vh - 120px); width: 100%; }
+    #map { height:calc(100vh - 54px); width:100%; }
 
-    /* ── Bounty list ── */
-    .section { padding: 16px; }
-    .section-title { font-size: 13px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
-    .bounty-card { background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--gray-200); box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
-    .bounty-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
-    .bounty-title { font-size: 16px; font-weight: 700; }
-    .bounty-desc { font-size: 13px; color: var(--gray-600); margin-top: 2px; }
-    .reward-chip { background: var(--red); color: white; font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 20px; white-space: nowrap; }
-    .reward-chip.orange { background: var(--orange); }
-    .reward-chip.green { background: var(--green); }
-    .bounty-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .status-badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
-    .status-open { background: #dbeafe; color: var(--blue); }
-    .status-claimed { background: #fef3c7; color: var(--yellow); }
-    .status-submitted { background: #dcfce7; color: var(--green); }
-    .bounty-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; }
-    .bounty-btn.claim { background: var(--blue); color: white; }
-    .bounty-btn.upload { background: var(--orange); color: white; }
-    .bounty-btn.submit { background: var(--green); color: white; }
+    /* ── Bounty cards ── */
+    .section { padding:16px; max-width:600px; margin:0 auto; }
+    .section-title { font-size:12px; font-weight:700; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+    .bounty-card { background:white; border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid var(--gray-200); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .bounty-card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; gap:10px; }
+    .bounty-title { font-size:16px; font-weight:700; }
+    .bounty-desc { font-size:13px; color:var(--gray-600); margin-top:2px; }
+    .reward-chip { background:var(--red); color:white; font-size:13px; font-weight:700; padding:5px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0; }
+    .reward-chip.orange { background:var(--orange); }
+    .reward-chip.green { background:var(--green); }
+    .status-badge { display:inline-block; font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; }
+    .status-open { background:#dbeafe; color:var(--blue); }
+    .status-claimed { background:#fef3c7; color:var(--yellow); }
+    .bounty-btn { width:100%; padding:12px; border:none; border-radius:10px; font-size:14px; font-weight:700; font-family:'Outfit',sans-serif; cursor:pointer; margin-top:10px; }
+    .bounty-btn.claim { background:var(--blue); color:white; }
+    .bounty-btn.upload { background:var(--orange); color:white; }
+    .bounty-btn.submit { background:var(--green); color:white; }
 
-    /* ── Upload screen ── */
-    .upload-header { background: white; border-bottom: 1px solid var(--gray-200); padding: 16px; display: flex; align-items: center; gap: 12px; }
-    .back-btn { background: var(--gray-100); border: none; border-radius: 8px; padding: 8px 12px; font-size: 16px; cursor: pointer; }
-    .upload-title { font-size: 16px; font-weight: 700; }
-    .upload-body { padding: 16px; }
-    .bounty-info-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .progress-bar { background: var(--gray-200); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 6px; }
-    .progress-fill { background: var(--green); height: 100%; border-radius: 8px; transition: width 0.3s; }
-    .progress-text { font-size: 13px; color: var(--gray-600); margin-bottom: 20px; }
-    .photo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
-    .photo-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; border: 2px solid var(--green); }
-    .add-photo-btn { width: 100%; padding: 16px; border: 2px dashed var(--gray-200); background: white; border-radius: 12px; font-size: 15px; font-weight: 600; color: var(--gray-600); font-family: 'Outfit', sans-serif; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .add-photo-btn:active { background: var(--gray-50); }
-    .msg-box { padding: 12px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 12px; }
-    .msg-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
-    .msg-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    /* ── Upload ── */
+    .upload-header { background:white; border-bottom:1px solid var(--gray-200); padding:14px 16px; display:flex; align-items:center; gap:12px; position:sticky; top:54px; z-index:100; }
+    .back-btn { background:var(--gray-100); border:none; border-radius:8px; padding:7px 12px; font-size:16px; cursor:pointer; }
+    .upload-body { padding:16px; max-width:600px; margin:0 auto; }
+    .bounty-info-card { background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px; margin-bottom:16px; display:flex; align-items:center; gap:12px; }
+    .progress-bar { background:var(--gray-200); border-radius:8px; height:8px; overflow:hidden; margin-bottom:6px; }
+    .progress-fill { background:var(--green); height:100%; border-radius:8px; transition:width 0.3s; }
+    .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    .photo-thumb { width:100%; aspect-ratio:1; object-fit:cover; border-radius:10px; border:2px solid var(--green); }
+    .add-photo-btn { width:100%; padding:16px; border:2px dashed var(--gray-200); background:white; border-radius:12px; font-size:15px; font-weight:600; color:var(--gray-600); font-family:'Outfit',sans-serif; cursor:pointer; margin-bottom:12px; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .msg-box { padding:12px 14px; border-radius:10px; font-size:13px; margin-bottom:12px; }
+    .msg-success { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+    .msg-error { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+    .instructions { background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:14px; margin-bottom:14px; }
+    .instructions li { font-size:13px; color:#1e40af; margin-bottom:4px; padding-left:4px; }
 
     /* ── Wallet ── */
-    .wallet-hero { background: var(--navy); color: white; padding: 32px 20px; text-align: center; }
-    .wallet-balance { font-family: 'Fraunces', serif; font-size: 48px; font-weight: 700; }
-    .wallet-label { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-    .wallet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; }
-    .wallet-stat { background: white; border-radius: 12px; padding: 16px; border: 1px solid var(--gray-200); text-align: center; }
-    .wallet-stat-val { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; color: var(--green); }
-    .wallet-stat-label { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+    .wallet-hero { background:var(--navy); color:white; padding:32px 20px; text-align:center; }
+    .wallet-balance { font-family:'Fraunces',serif; font-size:48px; font-weight:700; }
+    .wallet-label { font-size:14px; color:rgba(255,255,255,0.5); margin-top:4px; }
+    .wallet-stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px; max-width:500px; margin:0 auto; }
+    .wallet-stat { background:white; border-radius:12px; padding:16px; border:1px solid var(--gray-200); text-align:center; }
+    .wallet-stat-val { font-family:'Fraunces',serif; font-size:24px; font-weight:700; color:var(--green); }
+    .wallet-stat-label { font-size:12px; color:var(--gray-400); margin-top:4px; }
 
     /* ── Profile ── */
-    .profile-header { background: var(--navy); color: white; padding: 32px 20px; text-align: center; }
-    .profile-avatar { width: 72px; height: 72px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; margin: 0 auto 12px; }
-    .profile-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; }
-    .profile-email { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 4px; }
-    .profile-menu { padding: 16px; }
-    .menu-item { background: white; border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; border: 1px solid var(--gray-200); }
-    .menu-item-left { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 500; }
-    .menu-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-
-    /* ── Instructions ── */
-    .instructions { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
-    .instructions ul { padding-left: 16px; }
-    .instructions li { font-size: 13px; color: #1e40af; margin-bottom: 4px; }
-
-    /* ── Hidden file input ── */
-    #file-input { display: none; }
-
-    /* ── Loading overlay ── */
-    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .profile-header { background:var(--navy); color:white; padding:32px 20px; text-align:center; }
+    .profile-avatar { width:72px; height:72px; background:var(--blue); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:700; margin:0 auto 12px; }
+    .profile-name { font-family:'Fraunces',serif; font-size:22px; font-weight:700; }
+    .profile-email { font-size:13px; color:rgba(255,255,255,0.5); margin-top:4px; }
+    .profile-menu { padding:16px; max-width:500px; margin:0 auto; }
+    .menu-item { background:white; border-radius:12px; padding:16px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; border:1px solid var(--gray-200); }
+    .menu-item-left { display:flex; align-items:center; gap:12px; font-size:15px; font-weight:500; }
+    .menu-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
 
     /* ── Toast ── */
-    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--gray-800); color: white; padding: 12px 20px; border-radius: 10px; font-size: 14px; opacity: 0; transition: all 0.25s; z-index: 500; white-space: nowrap; pointer-events: none; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px); background:var(--gray-800); color:white; padding:12px 20px; border-radius:10px; font-size:14px; opacity:0; transition:all 0.25s; z-index:500; white-space:nowrap; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    .spinner { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.4); border-top-color:white; border-radius:50%; animation:spin 0.6s linear infinite; vertical-align:middle; margin-right:6px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .navbar-links { display:none; }
+      .hamburger { display:block; }
+    }
+    @media (min-width: 641px) {
+      .wallet-chip { display:flex; }
+    }
   </style>
 </head>
 <body>
 
 <!-- Login -->
 <div class="auth-screen active" id="login-screen">
-  <div class="auth-logo">
-    <h1>🗺️ Laesulia</h1>
-    <p>"<span>to follow</span>" — Toobaita, Malaita</p>
-  </div>
+  <div class="auth-logo"><h1>🗺️ Laesulia</h1><p>"<span>to follow</span>" — Toobaita, Malaita</p></div>
   <div class="auth-card">
     <h2>Sign In</h2>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com" autocomplete="off"></div>
@@ -151,10 +155,7 @@
 
 <!-- Register -->
 <div class="auth-screen" id="register-screen">
-  <div class="auth-logo">
-    <h1>🗺️ Laesulia</h1>
-    <p>Join as a Field Worker</p>
-  </div>
+  <div class="auth-logo"><h1>🗺️ Laesulia</h1><p>Join as a Field Worker</p></div>
   <div class="auth-card">
     <h2>Create Account</h2>
     <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. John Kwai"></div>
@@ -168,30 +169,33 @@
 
 <!-- App -->
 <div id="app">
-  <div class="topbar">
-    <div class="topbar-left">
-      <h1>🗺️ Laesulia</h1>
-      <p id="topbar-sub">Field Worker</p>
+  <nav class="navbar">
+    <div class="navbar-brand"><span style="font-size:20px">🗺️</span><h1>Laesulia</h1></div>
+    <div class="navbar-links">
+      <button class="nav-link active" id="nav-map" onclick="navigate('map')">🗺️ Map</button>
+      <button class="nav-link" id="nav-bounties" onclick="navigate('bounties')">🎯 Bounties</button>
+      <button class="nav-link" id="nav-wallet" onclick="navigate('wallet')">💰 Wallet</button>
+      <button class="nav-link" id="nav-profile" onclick="navigate('profile')">👤 Profile</button>
     </div>
-    <div class="wallet-chip" id="wallet-chip" onclick="navigate('wallet')">💰 $0 SBD</div>
+    <div class="navbar-right">
+      <div class="wallet-chip" id="wallet-chip" onclick="navigate('wallet')">💰 $0 SBD</div>
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-nav-link" id="mnav-map" onclick="navigate('map');toggleMenu()">🗺️ Map</button>
+    <button class="mobile-nav-link" id="mnav-bounties" onclick="navigate('bounties');toggleMenu()">🎯 Bounties</button>
+    <button class="mobile-nav-link" id="mnav-wallet" onclick="navigate('wallet');toggleMenu()">💰 Wallet</button>
+    <button class="mobile-nav-link" id="mnav-profile" onclick="navigate('profile');toggleMenu()">👤 Profile</button>
+    <div class="mobile-footer">
+      <span id="mobile-username" style="color:rgba(255,255,255,0.5);font-size:13px"></span>
+      <button class="btn-signout" onclick="logout()">Sign Out</button>
+    </div>
   </div>
 
   <div class="content" id="content"></div>
-
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-map" onclick="navigate('map')">
-      <span class="icon">🗺️</span><span class="label">Map</span>
-    </button>
-    <button class="nav-btn" id="nav-bounties" onclick="navigate('bounties')">
-      <span class="icon">🎯</span><span class="label">Bounties</span>
-    </button>
-    <button class="nav-btn" id="nav-wallet" onclick="navigate('wallet')">
-      <span class="icon">💰</span><span class="label">Wallet</span>
-    </button>
-    <button class="nav-btn" id="nav-profile" onclick="navigate('profile')">
-      <span class="icon">👤</span><span class="label">Profile</span>
-    </button>
-  </nav>
 </div>
 
 <input type="file" id="file-input" accept="image/*" capture="environment">
@@ -201,27 +205,20 @@
 const API = 'https://laesulia-api.onrender.com/api/v1';
 let token = localStorage.getItem('fw_token');
 let username = localStorage.getItem('fw_username');
-let email = localStorage.getItem('fw_email');
 let currentView = 'map';
 let mapInstance = null;
 let currentUploadBounty = null;
 let uploadedFiles = [];
-let required = 1;
+const required = 1;
 
 window.onload = () => {
   if (token) showApp();
   document.getElementById('file-input').addEventListener('change', handleFileSelect);
 };
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-function showRegister() {
-  document.getElementById('login-screen').classList.remove('active');
-  document.getElementById('register-screen').classList.add('active');
-}
-function showLogin() {
-  document.getElementById('register-screen').classList.remove('active');
-  document.getElementById('login-screen').classList.add('active');
-}
+function toggleMenu() { document.getElementById('mobile-menu').classList.toggle('open'); }
+function showRegister() { document.getElementById('login-screen').classList.remove('active'); document.getElementById('register-screen').classList.add('active'); }
+function showLogin() { document.getElementById('register-screen').classList.remove('active'); document.getElementById('login-screen').classList.add('active'); }
 
 async function login() {
   const emailVal = document.getElementById('login-email').value.trim();
@@ -229,22 +226,14 @@ async function login() {
   const errEl = document.getElementById('login-error');
   const btn = document.getElementById('login-btn');
   errEl.style.display = 'none';
-  btn.innerHTML = '<span class="spinner"></span>Signing in…';
-  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Signing in…'; btn.disabled = true;
   try {
-    const res = await fetch(API + '/auth/login', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email: emailVal, password})
-    });
+    const res = await fetch(API + '/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:emailVal, password}) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
-    saveAuth(data);
-    showApp();
-  } catch(e) {
-    errEl.textContent = e.message; errEl.style.display = 'block';
-  } finally {
-    btn.innerHTML = 'Sign In'; btn.disabled = false;
-  }
+    saveAuth(data, emailVal); showApp();
+  } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  finally { btn.innerHTML = 'Sign In'; btn.disabled = false; }
 }
 
 async function register() {
@@ -256,63 +245,49 @@ async function register() {
   errEl.style.display = 'none';
   if (!name || !emailVal || !password) { errEl.textContent = 'All fields required'; errEl.style.display = 'block'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; errEl.style.display = 'block'; return; }
-  btn.innerHTML = '<span class="spinner"></span>Creating account…';
-  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating…'; btn.disabled = true;
   try {
-    const res = await fetch(API + '/auth/register', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({username: name, email: emailVal, password})
-    });
+    const res = await fetch(API + '/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:name, email:emailVal, password}) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Registration failed');
-    saveAuth(data);
-    showApp();
-  } catch(e) {
-    errEl.textContent = e.message; errEl.style.display = 'block';
-  } finally {
-    btn.innerHTML = 'Create Account'; btn.disabled = false;
-  }
+    saveAuth(data, emailVal); showApp();
+  } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  finally { btn.innerHTML = 'Create Account'; btn.disabled = false; }
 }
 
-function saveAuth(data) {
+function saveAuth(data, emailVal) {
   token = data.token; username = data.username;
   localStorage.setItem('fw_token', token);
   localStorage.setItem('fw_username', data.username);
-  localStorage.setItem('fw_email', document.getElementById('login-email')?.value || document.getElementById('reg-email')?.value || '');
+  localStorage.setItem('fw_email', emailVal || '');
 }
 
 function showApp() {
   document.getElementById('login-screen').classList.remove('active');
   document.getElementById('register-screen').classList.remove('active');
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('topbar-sub').textContent = username || 'Field Worker';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('app').style.flexDirection = 'column';
+  document.getElementById('mobile-username').textContent = username || '';
   navigate('map');
   loadWallet();
 }
 
-function logout() {
-  localStorage.clear(); token = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').classList.add('active');
-}
+function logout() { localStorage.clear(); token = null; document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').classList.add('active'); }
 
-// ── API ───────────────────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
-  const res = await fetch(API + path, {
-    ...options,
-    headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token, ...(options.headers||{})}
-  });
+  const res = await fetch(API + path, { ...options, headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...(options.headers||{})} });
   if (res.status === 401) { logout(); return null; }
   return res.json();
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
 function navigate(view) {
   currentView = view;
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  const navEl = document.getElementById('nav-' + view);
-  if (navEl) navEl.classList.add('active');
-  const content = document.getElementById('content');
+  ['map','bounties','wallet','profile'].forEach(v => {
+    const el = document.getElementById('nav-'+v);
+    const mel = document.getElementById('mnav-'+v);
+    if (el) el.classList.toggle('active', v === view);
+    if (mel) mel.classList.toggle('active', v === view);
+  });
   if (view === 'map') renderMap();
   else if (view === 'bounties') renderBounties();
   else if (view === 'wallet') renderWallet();
@@ -323,31 +298,19 @@ function navigate(view) {
 async function renderMap() {
   document.getElementById('content').innerHTML = '<div id="map"></div>';
   await new Promise(r => setTimeout(r, 50));
-
   if (mapInstance) { mapInstance.remove(); mapInstance = null; }
-
   mapInstance = L.map('map').setView([-9.4313, 160.0521], 13);
-  L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-    attribution: '© Google', maxZoom: 21, maxNativeZoom: 21, userAgentPackageName: 'com.laesulia.app'
-  }).addTo(mapInstance);
-
+  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  satellite.addTo(mapInstance);
+  L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets}, {}, {position:'topright'}).addTo(mapInstance);
   const data = await apiFetch('/bounties?lat=-9.4313&lng=160.0521&radius=50000');
   if (!data?.bounties) return;
-
   data.bounties.forEach(b => {
-    const color = b.status === 'open' ? '#dc2626' : b.status === 'claimed' ? '#ea580c' : '#16a34a';
-    const emoji = b.status === 'open' ? '🔴' : b.status === 'claimed' ? '🟡' : '✅';
-    const marker = L.circleMarker([b.lat, b.lng], {
-      radius: 10, fillColor: color, color: 'white', weight: 2, fillOpacity: 0.9
-    }).addTo(mapInstance);
-    marker.bindPopup(`
-      <div style="font-family:'Outfit',sans-serif;min-width:160px">
-        <div style="font-weight:700;font-size:14px">${emoji} ${b.title}</div>
-        <div style="color:#6b7280;font-size:12px;margin:4px 0">${b.status}</div>
-        <div style="font-weight:700;color:#dc2626;margin-bottom:8px">$${b.reward_sbd} SBD</div>
-        ${b.status === 'open' ? `<button onclick="claimBounty('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd})" style="width:100%;padding:8px;background:#0066cc;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">🎯 Claim</button>` : ''}
-      </div>
-    `);
+    const color = b.status==='open' ? '#dc2626' : b.status==='claimed' ? '#ea580c' : '#16a34a';
+    const emoji = b.status==='open' ? '🔴' : b.status==='claimed' ? '🟡' : '✅';
+    L.circleMarker([b.lat, b.lng], {radius:10, fillColor:color, color:'white', weight:2, fillOpacity:0.9}).addTo(mapInstance)
+      .bindPopup(`<div style="font-family:'Outfit',sans-serif;min-width:160px"><div style="font-weight:700;font-size:14px">${emoji} ${b.title}</div><div style="color:#6b7280;font-size:12px;margin:4px 0">${b.status}</div><div style="font-weight:700;color:#dc2626;margin-bottom:8px">$${b.reward_sbd} SBD</div>${b.status==='open'?`<button onclick="claimFromMap('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd},'${(b.description||'').replace(/'/g,"\\'")}');mapInstance.closePopup()" style="width:100%;padding:8px;background:#0066cc;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">🎯 Claim</button>":''}</div>`);
   });
 }
 
@@ -355,65 +318,33 @@ async function renderMap() {
 async function renderBounties() {
   document.getElementById('content').innerHTML = '<div class="section"><div class="section-title">Loading…</div></div>';
   const data = await apiFetch('/bounties?lat=-9.4313&lng=160.0521&radius=50000');
-  if (!data?.bounties?.length) {
-    document.getElementById('content').innerHTML = '<div class="section"><div style="text-align:center;padding:48px;color:#94a3b8">No bounties available right now</div></div>';
-    return;
-  }
-
-  const open = data.bounties.filter(b => b.status === 'open');
-  const mine = data.bounties.filter(b => b.status === 'claimed');
-
+  if (!data?.bounties?.length) { document.getElementById('content').innerHTML = '<div class="section" style="text-align:center;padding:48px;color:#94a3b8">No bounties available</div>'; return; }
+  const open = data.bounties.filter(b => b.status==='open');
+  const mine = data.bounties.filter(b => b.status==='claimed');
   let html = '<div class="section">';
   if (open.length) {
     html += `<div class="section-title">🔴 Open — ${open.length} available</div>`;
-    open.forEach(b => {
-      html += `
-        <div class="bounty-card">
-          <div class="bounty-card-header">
-            <div><div class="bounty-title">${b.title}</div><div class="bounty-desc">${b.description || 'No instructions'}</div></div>
-            <div class="reward-chip">$${b.reward_sbd} SBD</div>
-          </div>
-          <div class="bounty-meta">
-            <span class="status-badge status-open">Open</span>
-            <span style="font-size:12px;color:#94a3b8">${b.submit_type}</span>
-          </div>
-          <button class="bounty-btn claim" onclick="claimBounty('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd})">🎯 Claim — $${b.reward_sbd} SBD</button>
-        </div>`;
-    });
+    open.forEach(b => { html += `<div class="bounty-card"><div class="bounty-card-header"><div><div class="bounty-title">${b.title}</div><div class="bounty-desc">${b.description||'No instructions'}</div></div><div class="reward-chip">$${b.reward_sbd} SBD</div></div><div style="margin-bottom:8px"><span class="status-badge status-open">Open</span></div><button class="bounty-btn claim" onclick="claimBounty('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd},'${(b.description||'').replace(/'/g,"\\'")}')">🎯 Claim — $${b.reward_sbd} SBD</button></div>`; });
   }
-
   if (mine.length) {
     html += `<div class="section-title" style="margin-top:16px">🟡 My Claimed Bounties</div>`;
-    mine.forEach(b => {
-      html += `
-        <div class="bounty-card">
-          <div class="bounty-card-header">
-            <div><div class="bounty-title">${b.title}</div><div class="bounty-desc">${b.description || ''}</div></div>
-            <div class="reward-chip orange">$${b.reward_sbd} SBD</div>
-          </div>
-          <div class="bounty-meta"><span class="status-badge status-claimed">Claimed</span></div>
-          <button class="bounty-btn upload" onclick="openUpload('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd},'${b.description?.replace(/'/g,"\\'")||''}')">📸 Upload Photos</button>
-        </div>`;
-    });
+    mine.forEach(b => { html += `<div class="bounty-card"><div class="bounty-card-header"><div><div class="bounty-title">${b.title}</div><div class="bounty-desc">${b.description||''}</div></div><div class="reward-chip orange">$${b.reward_sbd} SBD</div></div><div style="margin-bottom:8px"><span class="status-badge status-claimed">Claimed</span></div><button class="bounty-btn upload" onclick="openUpload('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd},'${(b.description||'').replace(/'/g,"\\'")}')">📸 Upload Photos</button></div>`; });
   }
-
-  if (!open.length && !mine.length) {
-    html += '<div style="text-align:center;padding:48px;color:#94a3b8">No open bounties right now. Check back soon! 🌴</div>';
-  }
-
+  if (!open.length && !mine.length) html += '<div style="text-align:center;padding:48px;color:#94a3b8">No open bounties right now 🌴</div>';
   html += '</div>';
   document.getElementById('content').innerHTML = html;
 }
 
-async function claimBounty(id, title, reward) {
-  if (mapInstance) { mapInstance.closePopup(); }
+async function claimBounty(id, title, reward, desc) {
   const data = await apiFetch('/bounties/' + id + '/claim', {method:'POST'});
-  if (data?.message) {
-    toast('✅ Claimed! Go take your photos.');
-    setTimeout(() => openUpload(id, title, reward, ''), 500);
-  } else {
-    toast('❌ ' + (data?.error || 'Already claimed'));
-  }
+  if (data?.message) { toast('✅ Claimed! Go take your photos.'); setTimeout(() => openUpload(id, title, reward, desc), 500); }
+  else toast('❌ ' + (data?.error || 'Already claimed'));
+}
+
+async function claimFromMap(id, title, reward, desc) {
+  const data = await apiFetch('/bounties/' + id + '/claim', {method:'POST'});
+  if (data?.message) { toast('✅ Claimed!'); setTimeout(() => openUpload(id, title, reward, desc), 500); }
+  else toast('❌ ' + (data?.error || 'Already claimed'));
 }
 
 // ── Upload ────────────────────────────────────────────────────────────────────
@@ -428,124 +359,74 @@ function renderUploadScreen() {
   if (!b) return;
   const progress = uploadedFiles.length / required;
   const photosHtml = uploadedFiles.map(f => `<img class="photo-thumb" src="${f}">`).join('');
-
   document.getElementById('content').innerHTML = `
     <div class="upload-header">
       <button class="back-btn" onclick="navigate('bounties')">←</button>
-      <div class="upload-title">Upload Photos</div>
+      <div style="font-weight:700;font-size:16px">Upload Photos</div>
     </div>
     <div class="upload-body">
       <div class="bounty-info-card">
         <div style="font-size:28px">🎯</div>
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:15px">${b.title}</div>
-          <div style="font-size:13px;color:#6b7280">${b.desc || 'Take clear photos of this location'}</div>
-        </div>
-        <div style="background:#dc2626;color:white;padding:5px 10px;border-radius:20px;font-weight:700;font-size:13px">$${b.reward} SBD</div>
+        <div style="flex:1"><div style="font-weight:700;font-size:15px">${b.title}</div><div style="font-size:13px;color:#6b7280">${b.desc||'Take clear photos'}</div></div>
+        <div style="background:#dc2626;color:white;padding:5px 10px;border-radius:20px;font-weight:700;font-size:13px;flex-shrink:0">$${b.reward} SBD</div>
       </div>
-
-      <div class="instructions">
-        <ul>
-          <li>📍 Go to the exact GPS location on the map</li>
-          <li>📸 Take ${required} clear photo(s)</li>
-          <li>☀️ Make sure lighting is good</li>
-          <li>🔄 Show different angles of the location</li>
-        </ul>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-          <span style="font-size:13px;font-weight:600">Progress</span>
-          <span style="font-size:13px;color:#6b7280">${uploadedFiles.length} of ${required} uploaded</span>
-        </div>
+      <div class="instructions"><ul style="list-style:none">
+        <li>📍 Go to the exact GPS location</li>
+        <li>📸 Take ${required} clear photo(s)</li>
+        <li>☀️ Make sure lighting is good</li>
+        <li>🔄 Show different angles</li>
+      </ul></div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;font-weight:600">Progress</span><span style="font-size:13px;color:#6b7280">${uploadedFiles.length} of ${required}</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${Math.min(progress*100,100)}%"></div></div>
       </div>
-
       ${photosHtml ? `<div class="photo-grid">${photosHtml}</div>` : ''}
-
       <div id="upload-msg"></div>
-
-      ${uploadedFiles.length < required ? `
-        <button class="add-photo-btn" onclick="document.getElementById('file-input').click()">
-          📷 Add Photo (${uploadedFiles.length}/${required})
-        </button>` : ''}
-
-      ${uploadedFiles.length >= required ? `
-        <button class="bounty-btn submit" onclick="submitBounty()" id="submit-btn">
-          ✅ Submit for Review — $${b.reward} SBD
-        </button>` : ''}
+      ${uploadedFiles.length < required ? `<button class="add-photo-btn" onclick="document.getElementById('file-input').click()">📷 Add Photo (${uploadedFiles.length}/${required})</button>` : ''}
+      ${uploadedFiles.length >= required ? `<button class="bounty-btn submit" onclick="submitBounty()" id="submit-btn">✅ Submit for Review — $${b.reward} SBD</button>` : ''}
     </div>`;
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  ['map','bounties','wallet','profile'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
 }
 
 async function handleFileSelect(e) {
   const file = e.target.files[0];
   if (!file || !currentUploadBounty) return;
   e.target.value = '';
-
   const msgEl = document.getElementById('upload-msg');
   if (msgEl) msgEl.innerHTML = '<div class="msg-box msg-success"><span class="spinner"></span> Uploading…</div>';
-
   try {
-    const bytes = await file.arrayBuffer();
-    const blob = new Blob([bytes], {type: 'image/jpeg'});
     const formData = new FormData();
-    formData.append('file', blob, file.name);
-
-    const res = await fetch(API + '/bounties/' + currentUploadBounty.id + '/upload', {
-      method: 'POST',
-      headers: {'Authorization': 'Bearer ' + token},
-      body: formData
-    });
+    formData.append('file', file, file.name);
+    const res = await fetch(API + '/bounties/' + currentUploadBounty.id + '/upload', { method:'POST', headers:{'Authorization':'Bearer '+token}, body:formData });
     const data = await res.json();
     if (res.ok) {
-      // Store preview
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        uploadedFiles.push(ev.target.result);
-        renderUploadScreen();
-      };
+      reader.onload = (ev) => { uploadedFiles.push(ev.target.result); renderUploadScreen(); };
       reader.readAsDataURL(file);
     } else {
-      if (msgEl) msgEl.innerHTML = `<div class="msg-box msg-error">❌ ${data.error || 'Upload failed'}</div>`;
+      if (msgEl) msgEl.innerHTML = `<div class="msg-box msg-error">❌ ${data.error||'Upload failed'}</div>`;
     }
-  } catch(err) {
-    if (msgEl) msgEl.innerHTML = `<div class="msg-box msg-error">❌ Network error</div>`;
-  }
+  } catch(err) { if (msgEl) msgEl.innerHTML = '<div class="msg-box msg-error">❌ Network error</div>'; }
 }
 
 async function submitBounty() {
   const btn = document.getElementById('submit-btn');
   if (btn) { btn.innerHTML = '<span class="spinner"></span> Submitting…'; btn.disabled = true; }
-  const data = await apiFetch('/bounties/' + currentUploadBounty.id + '/submit', {
-    method: 'POST', body: JSON.stringify({files:[]})
-  });
-  if (data?.message) {
-    toast('🎉 Submitted! Waiting for admin review.');
-    currentUploadBounty = null; uploadedFiles = [];
-    loadWallet();
-    setTimeout(() => navigate('bounties'), 1000);
-  } else {
-    toast('❌ ' + (data?.error || 'Submit failed'));
-    if (btn) { btn.innerHTML = '✅ Submit for Review'; btn.disabled = false; }
-  }
+  const data = await apiFetch('/bounties/' + currentUploadBounty.id + '/submit', { method:'POST', body:JSON.stringify({files:[]}) });
+  if (data?.message) { toast('🎉 Submitted! Waiting for review.'); currentUploadBounty = null; uploadedFiles = []; loadWallet(); setTimeout(() => navigate('bounties'), 800); }
+  else { toast('❌ ' + (data?.error||'Submit failed')); if (btn) { btn.innerHTML = '✅ Submit for Review'; btn.disabled = false; } }
 }
 
 // ── Wallet ────────────────────────────────────────────────────────────────────
 async function loadWallet() {
   const data = await apiFetch('/wallet');
-  if (data) {
-    const balance = data.balance_sbd || 0;
-    document.getElementById('wallet-chip').textContent = `💰 $${balance} SBD`;
-  }
+  if (data) document.getElementById('wallet-chip').textContent = '💰 $' + (data.balance_sbd||0) + ' SBD';
 }
 
 async function renderWallet() {
   document.getElementById('content').innerHTML = '<div class="wallet-hero"><div class="wallet-balance">…</div></div>';
   const data = await apiFetch('/wallet');
-  const balance = data?.balance_sbd || 0;
-  const earned = data?.total_earned || 0;
-  const withdrawn = data?.total_withdrawn || 0;
+  const balance = data?.balance_sbd||0, earned = data?.total_earned||0, withdrawn = data?.total_withdrawn||0;
   document.getElementById('content').innerHTML = `
     <div class="wallet-hero">
       <div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:8px">Current Balance</div>
@@ -553,17 +434,11 @@ async function renderWallet() {
       <div class="wallet-label">Solomon Islands Dollar (SBD)</div>
     </div>
     <div class="wallet-stats">
-      <div class="wallet-stat">
-        <div class="wallet-stat-val">$${earned.toFixed(2)}</div>
-        <div class="wallet-stat-label">Total Earned</div>
-      </div>
-      <div class="wallet-stat">
-        <div class="wallet-stat-val" style="color:#0066cc">$${withdrawn.toFixed(2)}</div>
-        <div class="wallet-stat-label">Withdrawn</div>
-      </div>
+      <div class="wallet-stat"><div class="wallet-stat-val">$${earned.toFixed(2)}</div><div class="wallet-stat-label">Total Earned</div></div>
+      <div class="wallet-stat"><div class="wallet-stat-val" style="color:#0066cc">$${withdrawn.toFixed(2)}</div><div class="wallet-stat-label">Withdrawn</div></div>
     </div>
-    <div class="section">
-      <div class="section-title">How to earn</div>
+    <div style="padding:16px;max-width:500px;margin:0 auto">
+      <div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">How to earn</div>
       <div style="background:white;border-radius:12px;padding:16px;border:1px solid #e2e8f0">
         <div style="display:flex;gap:12px;margin-bottom:12px"><span style="font-size:20px">1️⃣</span><div><div style="font-weight:600">Find an open bounty pin on the map</div><div style="font-size:13px;color:#6b7280">Red pins are available to claim</div></div></div>
         <div style="display:flex;gap:12px;margin-bottom:12px"><span style="font-size:20px">2️⃣</span><div><div style="font-weight:600">Go to the location & take photos</div><div style="font-size:13px;color:#6b7280">Clear photos from different angles</div></div></div>
@@ -575,8 +450,7 @@ async function renderWallet() {
 
 // ── Profile ───────────────────────────────────────────────────────────────────
 function renderProfile() {
-  const u = username || 'Field Worker';
-  const em = localStorage.getItem('fw_email') || '';
+  const u = username||'Field Worker', em = localStorage.getItem('fw_email')||'';
   document.getElementById('content').innerHTML = `
     <div class="profile-header">
       <div class="profile-avatar">${u[0].toUpperCase()}</div>
@@ -584,26 +458,13 @@ function renderProfile() {
       <div class="profile-email">${em}</div>
     </div>
     <div class="profile-menu">
-      <div class="menu-item" onclick="navigate('wallet')">
-        <div class="menu-item-left"><div class="menu-icon" style="background:#dcfce7">💰</div>My Wallet</div>
-        <span style="color:#94a3b8">›</span>
-      </div>
-      <div class="menu-item" onclick="navigate('bounties')">
-        <div class="menu-item-left"><div class="menu-icon" style="background:#dbeafe">🎯</div>My Bounties</div>
-        <span style="color:#94a3b8">›</span>
-      </div>
-      <div class="menu-item" onclick="logout()" style="margin-top:20px">
-        <div class="menu-item-left" style="color:#dc2626"><div class="menu-icon" style="background:#fee2e2">🚪</div>Sign Out</div>
-      </div>
+      <div class="menu-item" onclick="navigate('wallet')"><div class="menu-item-left"><div class="menu-icon" style="background:#dcfce7">💰</div>My Wallet</div><span style="color:#94a3b8">›</span></div>
+      <div class="menu-item" onclick="navigate('bounties')"><div class="menu-item-left"><div class="menu-icon" style="background:#dbeafe">🎯</div>My Bounties</div><span style="color:#94a3b8">›</span></div>
+      <div class="menu-item" onclick="logout()" style="margin-top:20px"><div class="menu-item-left" style="color:#dc2626"><div class="menu-icon" style="background:#fee2e2">🚪</div>Sign Out</div></div>
     </div>`;
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
 </script>
 </body>
 </html>
