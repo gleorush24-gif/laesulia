@@ -310,7 +310,7 @@ async function renderMap() {
     const color = b.status==='open' ? '#dc2626' : b.status==='claimed' ? '#ea580c' : '#16a34a';
     const emoji = b.status==='open' ? '🔴' : b.status==='claimed' ? '🟡' : '✅';
     L.circleMarker([b.lat, b.lng], {radius:10, fillColor:color, color:'white', weight:2, fillOpacity:0.9}).addTo(mapInstance)
-      .bindPopup(`<div style="font-family:'Outfit',sans-serif;min-width:160px"><div style="font-weight:700;font-size:14px">${emoji} ${b.title}</div><div style="color:#6b7280;font-size:12px;margin:4px 0">${b.status}</div><div style="font-weight:700;color:#dc2626;margin-bottom:8px">$${b.reward_sbd} SBD</div>${b.status==='open'?`<button onclick="claimFromMap('${b.id}','${b.title.replace(/'/g,"\\'")}',${b.reward_sbd},'${(b.description||'').replace(/'/g,"\\'")}');mapInstance.closePopup()" style="width:100%;padding:8px;background:#0066cc;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">🎯 Claim</button>":''}</div>`);
+      .bindPopup('<div style="min-width:160px"><b>' + emoji + ' ' + b.title + '</b><br><span style="color:#6b7280;font-size:12px">' + b.status + '</span><br><b style="color:#dc2626">$' + b.reward_sbd + ' SBD</b>' + (b.status==="open" ? '<br><button onclick="claimFromMap(\"' + b.id + '\",\"' + b.title.replace(/"/g,'') + '\",' + b.reward_sbd + ',\"' + (b.description||'').replace(/"/g,'') + '\")" style="width:100%;margin-top:8px;padding:8px;background:#0066cc;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer">🎯 Claim</button>' : '') + '</div>');
   });
 }
 
