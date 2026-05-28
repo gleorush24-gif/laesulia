@@ -4,177 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laesulia Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;1,400&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --navy: #0a1628;
-      --blue: #0066cc;
-      --blue-light: #e8f0fb;
-      --green: #16a34a;
-      --green-light: #dcfce7;
-      --red: #dc2626;
-      --red-light: #fee2e2;
-      --yellow: #d97706;
-      --yellow-light: #fef3c7;
-      --gray-50: #f8fafc;
-      --gray-100: #f1f5f9;
-      --gray-200: #e2e8f0;
-      --gray-400: #94a3b8;
-      --gray-600: #475569;
-      --gray-800: #1e293b;
-      --sidebar-w: 240px;
+      --navy: #0a1628; --blue: #0066cc; --blue-light: #e8f0fb;
+      --green: #16a34a; --green-light: #dcfce7;
+      --red: #dc2626; --red-light: #fee2e2;
+      --yellow: #d97706; --yellow-light: #fef3c7;
+      --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
+      --gray-400: #94a3b8; --gray-600: #475569; --gray-800: #1e293b;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Outfit', sans-serif; background: var(--gray-50); min-height: 100vh; color: var(--gray-800); }
 
     /* ── Login ── */
-    #login-screen {
-      display: flex; align-items: center; justify-content: center;
-      min-height: 100vh; background: var(--navy);
-      background-image: radial-gradient(ellipse at 20% 50%, #0d2a4a 0%, transparent 60%),
-                        radial-gradient(ellipse at 80% 20%, #0a3060 0%, transparent 50%);
-    }
-    .login-card {
-      background: white; border-radius: 20px; padding: 44px;
-      width: 100%; max-width: 420px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
-    }
+    #login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--navy); padding: 24px; }
+    .login-card { background: white; border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 32px 80px rgba(0,0,0,0.4); }
     .login-logo { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; margin-bottom: 4px; }
-    .login-sub { color: var(--gray-400); font-size: 14px; margin-bottom: 32px; }
+    .login-sub { color: var(--gray-400); font-size: 14px; margin-bottom: 28px; }
     .login-sub span { color: var(--blue); font-weight: 600; }
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-600); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .field input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; transition: border-color 0.2s; }
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-600); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .field input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 10px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; }
     .field input:focus { border-color: var(--blue); }
-    .btn-login { width: 100%; padding: 13px; background: var(--blue); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; margin-top: 8px; transition: opacity 0.2s; }
-    .btn-login:hover { opacity: 0.9; }
-    #login-error { color: var(--red); font-size: 13px; margin-top: 10px; display: none; }
+    .btn-login { width: 100%; padding: 13px; background: var(--blue); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; font-family: 'Outfit', sans-serif; cursor: pointer; margin-top: 8px; }
+    #login-error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
 
-    /* ── App Shell ── */
-    #app { display: none; min-height: 100vh; }
+    /* ── App ── */
+    #app { display: none; min-height: 100vh; flex-direction: column; }
 
-    /* ── Sidebar ── */
-    .sidebar {
-      position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
-      background: var(--navy); display: flex; flex-direction: column;
-      z-index: 100; padding: 0;
+    /* ── Navbar ── */
+    .navbar {
+      background: var(--navy); color: white;
+      padding: 0 24px; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
     }
-    .sidebar-logo {
-      padding: 24px 20px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    .navbar-brand { display: flex; align-items: center; gap: 10px; }
+    .navbar-brand h1 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; }
+    .navbar-brand span { font-size: 11px; color: rgba(255,255,255,0.4); display: none; }
+    .navbar-links { display: flex; align-items: center; gap: 2px; }
+    .nav-link {
+      padding: 7px 12px; border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6);
+      border: none; background: none; font-family: 'Outfit', sans-serif;
+      white-space: nowrap; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
     }
-    .sidebar-logo h1 { font-family: 'Fraunces', serif; font-size: 20px; color: white; font-weight: 700; }
-    .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-    .sidebar-user {
-      padding: 16px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .avatar { width: 32px; height: 32px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
-    .sidebar-user-info { flex: 1; min-width: 0; }
-    .sidebar-user-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
-    .nav { flex: 1; padding: 12px 0; overflow-y: auto; }
-    .nav-section { padding: 8px 20px 4px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 1px; }
-    .nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 20px; cursor: pointer; transition: all 0.15s;
-      font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55);
-      border-left: 3px solid transparent; margin: 1px 0;
-    }
-    .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-    .nav-item.active { background: rgba(0,102,204,0.2); color: white; border-left-color: var(--blue); }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
-    .nav-badge { margin-left: auto; background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
-    .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.08); }
-    .btn-signout { width: 100%; padding: 9px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; font-size: 13px; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.15s; }
-    .btn-signout:hover { background: rgba(255,255,255,0.1); color: white; }
+    .nav-link:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-link.active { background: rgba(0,102,204,0.3); color: white; }
+    .nav-link .badge { background: var(--red); color: white; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 8px; }
+    .navbar-right { display: flex; align-items: center; gap: 10px; }
+    .navbar-user { font-size: 13px; color: rgba(255,255,255,0.5); display: none; }
+    .btn-signout { padding: 6px 12px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; font-size: 12px; font-family: 'Outfit', sans-serif; cursor: pointer; white-space: nowrap; }
+    .btn-signout:hover { background: rgba(255,255,255,0.15); color: white; }
 
-    /* ── Main Content ── */
-    .main { margin-left: var(--sidebar-w); min-height: 100vh; }
-    .topbar {
-      background: white; border-bottom: 1px solid var(--gray-200);
-      padding: 0 32px; height: 60px; display: flex; align-items: center;
-      justify-content: space-between; position: sticky; top: 0; z-index: 50;
-    }
-    .topbar-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; }
-    .topbar-actions { display: flex; gap: 10px; align-items: center; }
-    .content { padding: 28px 32px; }
+    /* Mobile hamburger */
+    .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: white; font-size: 20px; }
+    .mobile-menu { display: none; background: var(--navy); border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 16px 16px; }
+    .mobile-menu.open { display: block; }
+    .mobile-nav-link { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 4px; border: none; background: none; font-family: 'Outfit', sans-serif; width: 100%; text-align: left; }
+    .mobile-nav-link:hover, .mobile-nav-link.active { background: rgba(0,102,204,0.25); color: white; }
+    .mobile-user { padding: 12px 16px; color: rgba(255,255,255,0.4); font-size: 13px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* ── Cards ── */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
-    .stat-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--gray-200); }
-    .stat-label { font-size: 12px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .stat-value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 700; color: var(--gray-800); }
-    .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+    /* ── Content ── */
+    .content { padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
 
-    .panel { background: white; border-radius: 12px; border: 1px solid var(--gray-200); overflow: hidden; margin-bottom: 24px; }
-    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
-    .panel-header h2 { font-size: 15px; font-weight: 600; }
-    .panel-body { padding: 0; }
-    .empty { text-align: center; padding: 48px; color: var(--gray-400); font-size: 14px; }
-    .loading { text-align: center; padding: 32px; color: var(--blue); font-size: 14px; }
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    .stat-card { background: white; border-radius: 12px; padding: 18px; border: 1px solid var(--gray-200); }
+    .stat-label { font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-value { font-family: 'Fraunces', serif; font-size: 30px; font-weight: 700; }
+    .stat-sub { font-size: 11px; color: var(--gray-400); margin-top: 3px; }
+
+    /* ── Panel ── */
+    .panel { background: white; border-radius: 12px; border: 1px solid var(--gray-200); overflow: hidden; margin-bottom: 20px; }
+    .panel-header { padding: 14px 18px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+    .panel-header h2 { font-size: 14px; font-weight: 600; }
+    .empty { text-align: center; padding: 40px; color: var(--gray-400); font-size: 14px; }
+    .loading { text-align: center; padding: 28px; color: var(--blue); font-size: 14px; }
 
     /* ── Table ── */
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; padding: 10px 16px; font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: 0.5px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
-    td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+    td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: var(--gray-50); }
 
     /* ── Buttons ── */
     button { font-family: 'Outfit', sans-serif; cursor: pointer; border: none; border-radius: 8px; font-weight: 600; transition: all 0.15s; }
-    .btn { padding: 8px 16px; font-size: 13px; }
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn { padding: 8px 14px; font-size: 13px; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
     .btn-primary { background: var(--blue); color: white; }
-    .btn-primary:hover { opacity: 0.9; }
     .btn-green { background: var(--green); color: white; }
-    .btn-green:hover { opacity: 0.9; }
     .btn-red { background: var(--red); color: white; }
-    .btn-red:hover { opacity: 0.9; }
     .btn-ghost { background: var(--gray-100); color: var(--gray-600); }
-    .btn-ghost:hover { background: var(--gray-200); }
 
     /* ── Badges ── */
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 700; }
     .badge-blue { background: var(--blue-light); color: var(--blue); }
     .badge-green { background: var(--green-light); color: var(--green); }
     .badge-yellow { background: var(--yellow-light); color: var(--yellow); }
     .badge-red { background: var(--red-light); color: var(--red); }
 
     /* ── Forms ── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-full { grid-column: 1 / -1; }
-    .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-600); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .form-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; transition: border-color 0.2s; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; color: var(--gray-600); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-size: 14px; font-family: 'Outfit', sans-serif; outline: none; }
     .form-input:focus { border-color: var(--blue); }
     select.form-input { background: white; }
+    .drop-card { background: white; border-radius: 12px; border: 1px solid var(--gray-200); padding: 20px; margin-bottom: 20px; }
+    .drop-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
 
-    /* ── Photo thumbs ── */
-    .thumb-wrap { display: inline-block; margin-right: 6px; text-align: center; vertical-align: top; }
-    .thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; border: 2px solid var(--gray-200); cursor: pointer; transition: transform 0.15s; display: block; }
+    /* ── Thumbs ── */
+    .thumb-wrap { display: inline-block; margin-right: 5px; text-align: center; vertical-align: top; }
+    .thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 6px; border: 2px solid var(--gray-200); cursor: pointer; display: block; transition: transform 0.15s; }
     .thumb:hover { transform: scale(1.08); border-color: var(--blue); }
-    .thumb-time { font-size: 9px; color: var(--gray-400); margin-top: 3px; line-height: 1.2; max-width: 56px; }
+    .thumb-time { font-size: 9px; color: var(--gray-400); margin-top: 2px; max-width: 52px; line-height: 1.2; }
 
     /* ── Toast ── */
-    .toast { position: fixed; bottom: 28px; right: 28px; background: var(--gray-800); color: white; padding: 13px 20px; border-radius: 10px; font-size: 14px; opacity: 0; transform: translateY(8px); transition: all 0.25s; z-index: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--gray-800); color: white; padding: 12px 18px; border-radius: 10px; font-size: 14px; opacity: 0; transform: translateY(8px); transition: all 0.25s; z-index: 500; }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* ── Fullscreen photo ── */
-    .photo-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-    .photo-overlay img { max-width: 90vw; max-height: 80vh; border-radius: 12px; object-fit: contain; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
-    .photo-overlay-time { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 14px; }
-    .photo-overlay-close { color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 8px; }
+    /* ── Photo overlay ── */
+    .photo-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 24px; }
+    .photo-overlay img { max-width: 100%; max-height: 80vh; border-radius: 12px; }
+    .photo-overlay-time { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 12px; }
 
-    /* ── Drop bounty form ── */
-    .drop-card { background: white; border-radius: 12px; border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 24px; }
-    .drop-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 18px; }
-
-    /* ── Map placeholder ── */
-    #map-iframe { width: 100%; height: 420px; border-radius: 12px; border: 1px solid var(--gray-200); }
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .navbar-links { display: none; }
+      .navbar-user { display: none; }
+      .hamburger { display: block; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-full { grid-column: 1; }
+      .content { padding: 16px; }
+      .navbar { padding: 0 16px; }
+      .stat-value { font-size: 24px; }
+    }
+    @media (min-width: 769px) {
+      .navbar-user { display: block; }
+      .navbar-brand span { display: block; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card { padding: 14px; }
+    }
   </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 
@@ -183,71 +164,50 @@
   <div class="login-card">
     <div class="login-logo">🗺️ Laesulia</div>
     <div class="login-sub">"<span>to follow</span>" — Toobaita, Malaita · Admin</div>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="admin@laesulia.app">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="login-password" placeholder="••••••••" onkeyup="if(event.key==='Enter')login()">
-    </div>
-    <button class="btn-login" onclick="login()">Sign In</button>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="admin@laesulia.app" autocomplete="off"></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="off" onkeyup="if(event.key==='Enter')login()"></div>
     <div id="login-error"></div>
+    <button class="btn-login" onclick="login()">Sign In</button>
   </div>
 </div>
 
 <!-- App -->
 <div id="app">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <h1>🗺️ Laesulia</h1>
-      <p>Admin Dashboard</p>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span style="font-size:20px">🗺️</span>
+      <h1>Laesulia</h1>
+      <span>Admin Dashboard</span>
     </div>
-    <div class="sidebar-user">
-      <div class="avatar" id="avatar-initial">G</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" id="sidebar-username">gordon</div>
-        <div class="sidebar-user-role">Administrator</div>
-      </div>
+    <div class="navbar-links">
+      <button class="nav-link active" id="nav-dashboard" onclick="navigate('dashboard')">📊 Dashboard</button>
+      <button class="nav-link" id="nav-bounties" onclick="navigate('bounties')">🎯 Bounty Pins</button>
+      <button class="nav-link" id="nav-submissions" onclick="navigate('submissions')">📸 Submissions <span class="badge" id="submissions-badge" style="display:none">0</span></button>
+      <button class="nav-link" id="nav-approved" onclick="navigate('approved')">✅ Approved</button>
+      <button class="nav-link" id="nav-locations" onclick="navigate('locations')">📍 Locations</button>
     </div>
-    <nav class="nav">
-      <div class="nav-section">Overview</div>
-      <div class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard">
-        <span class="icon">📊</span> Dashboard
-      </div>
-      <div class="nav-section">Field Work</div>
-      <div class="nav-item" onclick="navigate('bounties')" id="nav-bounties">
-        <span class="icon">🎯</span> Bounty Pins
-      </div>
-      <div class="nav-item" onclick="navigate('submissions')" id="nav-submissions">
-        <span class="icon">📸</span> Submissions
-        <span class="nav-badge" id="submissions-badge" style="display:none">0</span>
-      </div>
-      <div class="nav-item" onclick="navigate('approved')" id="nav-approved">
-        <span class="icon">✅</span> Approved
-      </div>
-      <div class="nav-section">Management</div>
-      <div class="nav-item" onclick="navigate('locations')" id="nav-locations">
-        <span class="icon">📍</span> Locations
-      </div>
-      <div class="nav-item" onclick="navigate('workers')" id="nav-workers">
-        <span class="icon">👥</span> Field Workers
-      </div>
-    </nav>
-    <div class="sidebar-footer">
+    <div class="navbar-right">
+      <span class="navbar-user" id="navbar-user"></span>
+      <button class="btn-signout" onclick="logout()">Sign Out</button>
+      <button class="hamburger" onclick="toggleMenu()">☰</button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-nav-link active" id="mnav-dashboard" onclick="navigate('dashboard');toggleMenu()">📊 Dashboard</button>
+    <button class="mobile-nav-link" id="mnav-bounties" onclick="navigate('bounties');toggleMenu()">🎯 Bounty Pins</button>
+    <button class="mobile-nav-link" id="mnav-submissions" onclick="navigate('submissions');toggleMenu()">📸 Submissions</button>
+    <button class="mobile-nav-link" id="mnav-approved" onclick="navigate('approved');toggleMenu()">✅ Approved</button>
+    <button class="mobile-nav-link" id="mnav-locations" onclick="navigate('locations');toggleMenu()">📍 Locations</button>
+    <div class="mobile-user">
+      <span id="mobile-username"></span>
       <button class="btn-signout" onclick="logout()">Sign Out</button>
     </div>
-  </aside>
-
-  <!-- Main -->
-  <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
-      <div class="topbar-actions" id="topbar-actions"></div>
-    </div>
-    <div class="content" id="content"></div>
   </div>
+
+  <div class="content" id="content"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -259,200 +219,122 @@ let currentView = 'dashboard';
 
 window.onload = () => { if (token) showApp(); };
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
+function toggleMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+
 async function login() {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
   try {
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email, password})
-    });
+    const res = await fetch(API + '/auth/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email, password}) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Login failed');
     token = data.token;
     localStorage.setItem('laesulia_token', token);
     localStorage.setItem('laesulia_username', data.username);
     showApp();
-  } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-  }
+  } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
 }
 
-function logout() {
-  localStorage.clear(); token = null;
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
-}
+function logout() { localStorage.clear(); token = null; document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }
 
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  const username = localStorage.getItem('laesulia_username') || 'Admin';
-  document.getElementById('sidebar-username').textContent = username;
-  document.getElementById('avatar-initial').textContent = username[0].toUpperCase();
+  document.getElementById('app').style.display = 'flex';
+  const u = localStorage.getItem('laesulia_username') || 'Admin';
+  document.getElementById('navbar-user').textContent = u;
+  document.getElementById('mobile-username').textContent = u;
   navigate('dashboard');
   loadSubmissionsBadge();
+}
+
+async function api(path, options = {}) {
+  const res = await fetch(API + path, { ...options, headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token, ...(options.headers||{})} });
+  if (res.status === 401) { logout(); return null; }
+  return res.json();
+}
+
+function navigate(view) {
+  currentView = view;
+  ['dashboard','bounties','submissions','approved','locations'].forEach(v => {
+    const el = document.getElementById('nav-'+v);
+    const mel = document.getElementById('mnav-'+v);
+    if (el) el.classList.toggle('active', v === view);
+    if (mel) mel.classList.toggle('active', v === view);
+  });
+  document.getElementById('content').innerHTML = '<div class="loading">Loading…</div>';
+  const views = { dashboard: renderDashboard, bounties: renderBounties, submissions: renderSubmissions, approved: renderApproved, locations: renderLocations };
+  if (views[view]) views[view]();
 }
 
 async function loadSubmissionsBadge() {
   const data = await api('/admin/bounties/submitted');
   const count = data?.jobs?.length || 0;
   const badge = document.getElementById('submissions-badge');
-  if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
   else badge.style.display = 'none';
-}
-
-// ── API ───────────────────────────────────────────────────────────────────────
-async function api(path, options = {}) {
-  const res = await fetch(`${API}${path}`, {
-    ...options,
-    headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}`, ...(options.headers||{}) }
-  });
-  if (res.status === 401) { logout(); return null; }
-  return res.json();
-}
-
-// ── Navigation ────────────────────────────────────────────────────────────────
-function navigate(view) {
-  currentView = view;
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  const navEl = document.getElementById('nav-' + view);
-  if (navEl) navEl.classList.add('active');
-  const titles = { dashboard:'Dashboard', bounties:'Bounty Pins', submissions:'Submissions', approved:'Approved', locations:'Locations', workers:'Field Workers' };
-  document.getElementById('topbar-title').textContent = titles[view] || view;
-  document.getElementById('topbar-actions').innerHTML = '';
-  const content = document.getElementById('content');
-  content.innerHTML = '<div class="loading">Loading…</div>';
-  const views = { dashboard: renderDashboard, bounties: renderBounties, submissions: renderSubmissions, approved: renderApproved, locations: renderLocations, workers: renderWorkers };
-  if (views[view]) views[view]();
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 async function renderDashboard() {
-  const [bountiesData, submissionsData] = await Promise.all([
-    api('/bounties?lat=-9.4313&lng=160.0521&radius=100000'),
-    api('/admin/bounties/submitted')
-  ]);
-  const bounties = bountiesData?.bounties || [];
-  const open = bounties.filter(b => b.status === 'open').length;
-  const claimed = bounties.filter(b => b.status === 'claimed').length;
-  const submitted = submissionsData?.jobs?.length || 0;
-  const approved = bounties.filter(b => b.status === 'approved').length;
-
+  const [bd, sd] = await Promise.all([api('/bounties?lat=-9.4313&lng=160.0521&radius=100000'), api('/admin/bounties/submitted')]);
+  const b = bd?.bounties || [];
+  const open = b.filter(x => x.status==='open').length;
+  const claimed = b.filter(x => x.status==='claimed').length;
+  const submitted = sd?.jobs?.length || 0;
+  const approved = b.filter(x => x.status==='approved').length;
   document.getElementById('content').innerHTML = `
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Open Pins</div>
-        <div class="stat-value" style="color:var(--blue)">${open}</div>
-        <div class="stat-sub">Waiting for field workers</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">In Progress</div>
-        <div class="stat-value" style="color:var(--yellow)">${claimed}</div>
-        <div class="stat-sub">Currently claimed</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Pending Review</div>
-        <div class="stat-value" style="color:var(--red)">${submitted}</div>
-        <div class="stat-sub">Awaiting approval</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Approved</div>
-        <div class="stat-value" style="color:var(--green)">${approved}</div>
-        <div class="stat-sub">Paid out</div>
-      </div>
+      <div class="stat-card"><div class="stat-label">Open Pins</div><div class="stat-value" style="color:var(--blue)">${open}</div><div class="stat-sub">Waiting for field workers</div></div>
+      <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--yellow)">${claimed}</div><div class="stat-sub">Currently claimed</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Review</div><div class="stat-value" style="color:var(--red)">${submitted}</div><div class="stat-sub">Awaiting approval</div></div>
+      <div class="stat-card"><div class="stat-label">Approved</div><div class="stat-value" style="color:var(--green)">${approved}</div><div class="stat-sub">Paid out</div></div>
     </div>
     <div class="panel">
-      <div class="panel-header">
-        <h2>📸 Pending Review</h2>
-        <button class="btn btn-primary btn-sm" onclick="navigate('submissions')">View All</button>
-      </div>
+      <div class="panel-header"><h2>📸 Pending Review</h2><button class="btn btn-primary btn-sm" onclick="navigate('submissions')">View All</button></div>
       <div id="dash-submissions"><div class="loading">Loading…</div></div>
     </div>`;
-
-  if (submitted === 0) {
-    document.getElementById('dash-submissions').innerHTML = '<div class="empty">No pending submissions</div>';
-    return;
-  }
-  const rows = submissionsData.jobs.slice(0,5).map(j => `
-    <tr>
-      <td><strong>${j.title}</strong><br><span style="color:var(--gray-400);font-size:12px">by ${j.username}</span></td>
-      <td><span id="dash-thumbs-${j.id}">Loading…</span></td>
-      <td><strong>$${j.reward_sbd} SBD</strong></td>
-      <td>
-        <button class="btn btn-green btn-sm" onclick="approve('${j.id}')">✅ Approve & Pay</button>
-      </td>
-    </tr>`).join('');
-  document.getElementById('dash-submissions').innerHTML = `
-    <table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Action</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
-  submissionsData.jobs.slice(0,5).forEach(j => loadThumbs(j.id, 'dash-thumbs-'));
+  if (!sd?.jobs?.length) { document.getElementById('dash-submissions').innerHTML = '<div class="empty">No pending submissions</div>'; return; }
+  const rows = sd.jobs.slice(0,5).map(j => `<tr><td><strong>${j.title}</strong><br><span style="color:var(--gray-400);font-size:12px">by ${j.username}</span></td><td><span id="dash-thumbs-${j.id}">…</span></td><td><strong>$${j.reward_sbd} SBD</strong></td><td><button class="btn btn-green btn-sm" onclick="approve('${j.id}')">✅ Pay</button></td></tr>`).join('');
+  document.getElementById('dash-submissions').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  sd.jobs.slice(0,5).forEach(j => loadThumbs(j.id, 'dash-thumbs-'));
 }
 
 // ── Bounties ──────────────────────────────────────────────────────────────────
 async function renderBounties() {
-  document.getElementById('topbar-actions').innerHTML =
-    `<button class="btn btn-primary btn-sm" onclick="scrollToDropForm()">+ Drop New Pin</button>`;
-
   document.getElementById('content').innerHTML = `
     <div class="drop-card">
       <h2>🎯 Drop a New Bounty Pin</h2>
       <div class="form-grid">
         <div><label class="form-label">Title *</label><input class="form-input" id="b-title" placeholder="e.g. Kukum Road Junction"></div>
         <div><label class="form-label">Reward (SBD)</label><input class="form-input" type="number" id="b-reward" value="5"></div>
-        <div style="grid-column:1/-1">
+        <div class="form-full">
           <label class="form-label">Click Map to Place Pin *</label>
-          <div id="drop-map" style="height:550px;width:100%;border-radius:8px;border:1.5px solid var(--gray-200);margin-bottom:4px;display:block"></div>
-          
-          <div id="drop-coords" style="font-size:12px;color:var(--gray-400)">Click the map to set coordinates</div>
+          <div id="drop-map" style="height:420px;width:100%;border-radius:10px;border:1.5px solid var(--gray-200);margin-bottom:6px;display:block"></div>
+          <div id="drop-coords" style="font-size:12px;color:var(--gray-400);margin-bottom:10px">Click the map to set coordinates</div>
+          <input type="hidden" id="b-lat"><input type="hidden" id="b-lng">
         </div>
-        <div><label class="form-label">Latitude</label><input class="form-input" type="number" id="b-lat" placeholder="-9.4313" step="0.0001"></div>
-        <div><label class="form-label">Longitude</label><input class="form-input" type="number" id="b-lng" placeholder="160.0521" step="0.0001"></div>
         <div class="form-full"><label class="form-label">Instructions</label><input class="form-input" id="b-desc" placeholder="What should the field worker photograph?"></div>
-        <div><label class="form-label">Submit Type</label>
-          <select class="form-input" id="b-type">
-            <option value="both">Both (photos or videos)</option>
-            <option value="photos">Photos only</option>
-            <option value="videos">Videos only</option>
-          </select>
-        </div>
+        <div><label class="form-label">Submit Type</label><select class="form-input" id="b-type"><option value="both">Both</option><option value="photos">Photos only</option><option value="videos">Videos only</option></select></div>
       </div>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="createBounty()">🎯 Drop Bounty Pin</button>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="createBounty()">🎯 Drop Bounty Pin</button>
     </div>
     <div class="panel">
-      <div class="panel-header">
-        <h2>Active Bounty Pins</h2>
-        <button class="btn btn-ghost btn-sm" onclick="renderBounties()">Refresh</button>
-      </div>
+      <div class="panel-header"><h2>Active Bounty Pins</h2><button class="btn btn-ghost btn-sm" onclick="loadBountiesList()">Refresh</button></div>
       <div id="bounties-list"><div class="loading">Loading…</div></div>
     </div>`;
+  setTimeout(initDropMap, 400);
+  loadBountiesList();
+}
 
+async function loadBountiesList() {
   const data = await api('/bounties?lat=-9.4313&lng=160.0521&radius=100000');
-  if (!data?.bounties?.length) {
-    document.getElementById('bounties-list').innerHTML = '<div class="empty">No bounties yet — drop your first pin above!</div>';
-    return;
-  }
-  const rows = data.bounties.map(b => `
-    <tr>
-      <td><strong>${b.title}</strong></td>
-      <td style="color:var(--gray-400);font-size:13px">${b.lat.toFixed(4)}, ${b.lng.toFixed(4)}</td>
-      <td><strong>$${b.reward_sbd} SBD</strong></td>
-      <td>${b.submit_type}</td>
-      <td>${statusBadge(b.status)}</td>
-      <td>
-        <div style="display:flex;gap:6px">
-          ${b.status === 'submitted' ? `<button class="btn btn-green btn-sm" onclick="approve('${b.id}')">✅ Pay</button>` : ''}
-          <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteBounty('${b.id}')">🗑</button>
-        </div>
-      </td>
-    </tr>`).join('');
-  document.getElementById('bounties-list').innerHTML = `
-    <table><thead><tr><th>Title</th><th>Location</th><th>Reward</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+  if (!data?.bounties?.length) { document.getElementById('bounties-list').innerHTML = '<div class="empty">No bounties yet</div>'; return; }
+  const rows = data.bounties.map(b => `<tr><td><strong>${b.title}</strong></td><td style="color:var(--gray-400);font-size:13px">${b.lat.toFixed(4)}, ${b.lng.toFixed(4)}</td><td><strong>$${b.reward_sbd} SBD</strong></td><td>${b.submit_type}</td><td>${statusBadge(b.status)}</td><td><div style="display:flex;gap:6px">${b.status==='submitted'?`<button class="btn btn-green btn-sm" onclick="approve('${b.id}')">✅ Pay</button>`:''}<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteBounty('${b.id}')">🗑</button></div></td></tr>`).join('');
+  document.getElementById('bounties-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Title</th><th>Location</th><th>Reward</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 async function createBounty() {
@@ -462,269 +344,144 @@ async function createBounty() {
   const reward = parseFloat(document.getElementById('b-reward').value) || 5;
   const desc = document.getElementById('b-desc').value.trim();
   const type = document.getElementById('b-type').value;
-  if (!title || !lat || !lng) { toast('⚠️ Title, Lat and Lng are required'); return; }
+  if (!title || !lat || !lng) { toast('⚠️ Title and map pin are required'); return; }
   const data = await api('/bounties', { method:'POST', body: JSON.stringify({title, description:desc, lat, lng, reward_sbd:reward, submit_type:type}) });
   if (data?.id) {
     toast('🎯 Bounty pin dropped!');
     document.getElementById('b-title').value = '';
     document.getElementById('b-desc').value = '';
+    document.getElementById('b-lat').value = '';
+    document.getElementById('b-lng').value = '';
     document.getElementById('drop-coords').textContent = 'Click the map to drop another pin';
     document.getElementById('drop-coords').style.color = 'var(--gray-400)';
-    if(window._adminMarker) { window._adminMap.removeLayer(window._adminMarker); window._adminMarker = null; }
+    if (window._dmk && window._dm) { window._dm.removeLayer(window._dmk); window._dmk = null; }
     loadBountiesList();
-  }
-  else toast('❌ ' + (data?.error || 'Failed'));
+  } else toast('❌ ' + (data?.error || 'Failed'));
 }
 
 async function deleteBounty(id) {
   if (!confirm('Delete this bounty?')) return;
-  await api(`/bounties/${id}`, { method:'DELETE' });
-  toast('🗑️ Deleted'); renderBounties();
+  await api('/bounties/' + id, { method:'DELETE' });
+  toast('🗑️ Deleted'); loadBountiesList();
+}
+
+// ── Map init ──────────────────────────────────────────────────────────────────
+function initDropMap() {
+  if (typeof L === 'undefined') { setTimeout(initDropMap, 200); return; }
+  var el = document.getElementById('drop-map');
+  if (!el || el._leaflet_id) return;
+  window._dm = L.map('drop-map').setView([-9.4313, 160.0521], 13);
+  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  satellite.addTo(window._dm);
+  L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets}, {}, {position:'topright'}).addTo(window._dm);
+  setTimeout(function(){ window._dm.invalidateSize(); }, 200);
+  fetch(API + '/bounties?lat=-9.4313&lng=160.0521&radius=100000', {headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
+    if (!d || !d.bounties) return;
+    d.bounties.forEach(function(b) {
+      var c = b.status==='open' ? '#dc2626' : b.status==='claimed' ? '#d97706' : '#16a34a';
+      L.circleMarker([b.lat, b.lng], {radius:8, fillColor:c, color:'white', weight:2, fillOpacity:0.9}).addTo(window._dm).bindPopup('<b>'+b.title+'</b><br>$'+b.reward_sbd+' SBD');
+    });
+  });
+  window._dmk = null;
+  window._dm.on('click', function(e) {
+    var lat = e.latlng.lat.toFixed(5), lng = e.latlng.lng.toFixed(5);
+    document.getElementById('b-lat').value = lat;
+    document.getElementById('b-lng').value = lng;
+    document.getElementById('drop-coords').textContent = '📍 ' + lat + ', ' + lng;
+    document.getElementById('drop-coords').style.color = '#16a34a';
+    if (window._dmk) window._dm.removeLayer(window._dmk);
+    window._dmk = L.marker([lat, lng]).addTo(window._dm);
+  });
 }
 
 // ── Submissions ───────────────────────────────────────────────────────────────
 async function renderSubmissions() {
-  document.getElementById('content').innerHTML = `
-    <div class="panel">
-      <div class="panel-header">
-        <h2>📸 Pending Review</h2>
-        <button class="btn btn-ghost btn-sm" onclick="renderSubmissions()">Refresh</button>
-      </div>
-      <div id="submissions-list"><div class="loading">Loading…</div></div>
-    </div>`;
-
+  document.getElementById('content').innerHTML = `<div class="panel"><div class="panel-header"><h2>📸 Pending Review</h2><button class="btn btn-ghost btn-sm" onclick="renderSubmissions()">Refresh</button></div><div id="submissions-list"><div class="loading">Loading…</div></div></div>`;
   const data = await api('/admin/bounties/submitted');
   loadSubmissionsBadge();
-  if (!data?.jobs?.length) {
-    document.getElementById('submissions-list').innerHTML = '<div class="empty">No pending submissions — field workers are out there! 🌴</div>';
-    return;
-  }
-  const rows = data.jobs.map(j => `
-    <tr>
-      <td>
-        <strong>${j.title}</strong><br>
-        <span style="color:var(--gray-400);font-size:12px">by ${j.username}</span>
-      </td>
-      <td><span id="thumbs-${j.id}">Loading…</span></td>
-      <td><strong>$${j.reward_sbd} SBD</strong></td>
-      <td>${j.submit_type}</td>
-      <td>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" onclick="viewFiles('${j.id}','${esc(j.title)}')">👁 View</button>
-          <button class="btn btn-green btn-sm" onclick="approve('${j.id}')">✅ Approve & Pay</button>
-        </div>
-      </td>
-    </tr>`).join('');
-  document.getElementById('submissions-list').innerHTML = `
-    <table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Type</th><th>Actions</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+  if (!data?.jobs?.length) { document.getElementById('submissions-list').innerHTML = '<div class="empty">No pending submissions 🌴</div>'; return; }
+  const rows = data.jobs.map(j => `<tr><td><strong>${j.title}</strong><br><span style="color:var(--gray-400);font-size:12px">by ${j.username}</span></td><td><span id="thumbs-${j.id}">…</span></td><td><strong>$${j.reward_sbd} SBD</strong></td><td>${j.submit_type}</td><td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="viewFiles('${j.id}','${esc(j.title)}')">👁</button><button class="btn btn-green btn-sm" onclick="approve('${j.id}')">✅ Pay</button></div></td></tr>`).join('');
+  document.getElementById('submissions-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Type</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   data.jobs.forEach(j => loadThumbs(j.id, 'thumbs-'));
 }
 
 // ── Approved ──────────────────────────────────────────────────────────────────
 async function renderApproved() {
-  document.getElementById('content').innerHTML = `
-    <div class="panel">
-      <div class="panel-header">
-        <h2>✅ Approved Submissions</h2>
-        <button class="btn btn-ghost btn-sm" onclick="renderApproved()">Refresh</button>
-      </div>
-      <div id="approved-list"><div class="loading">Loading…</div></div>
-    </div>`;
-
+  document.getElementById('content').innerHTML = `<div class="panel"><div class="panel-header"><h2>✅ Approved Submissions</h2><button class="btn btn-ghost btn-sm" onclick="renderApproved()">Refresh</button></div><div id="approved-list"><div class="loading">Loading…</div></div></div>`;
   const data = await api('/bounties?lat=-9.4313&lng=160.0521&radius=100000');
-  const approved = data?.bounties?.filter(b => b.status === 'approved') || [];
-  if (!approved.length) {
-    document.getElementById('approved-list').innerHTML = '<div class="empty">No approved submissions yet</div>';
-    return;
-  }
-  const rows = approved.map(b => `
-    <tr>
-      <td><strong>${b.title}</strong></td>
-      <td><span id="app-thumbs-${b.id}">Loading…</span></td>
-      <td><strong>$${b.reward_sbd} SBD</strong></td>
-      <td><span class="badge badge-green">✅ Paid</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="viewFiles('${b.id}','${esc(b.title)}')">👁 View</button></td>
-    </tr>`).join('');
-  document.getElementById('approved-list').innerHTML = `
-    <table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+  const approved = data?.bounties?.filter(b => b.status==='approved') || [];
+  if (!approved.length) { document.getElementById('approved-list').innerHTML = '<div class="empty">No approved submissions yet</div>'; return; }
+  const rows = approved.map(b => `<tr><td><strong>${b.title}</strong></td><td><span id="app-thumbs-${b.id}">…</span></td><td><strong>$${b.reward_sbd} SBD</strong></td><td><span class="badge badge-green">✅ Paid</span></td><td><button class="btn btn-ghost btn-sm" onclick="viewFiles('${b.id}','${esc(b.title)}')">👁 View</button></td></tr>`).join('');
+  document.getElementById('approved-list').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   approved.forEach(b => loadThumbs(b.id, 'app-thumbs-'));
 }
 
 // ── Locations ─────────────────────────────────────────────────────────────────
 async function renderLocations() {
   document.getElementById('content').innerHTML = `
-    <div class="panel" style="margin-bottom:20px">
-      <div class="panel-header"><h2>Search Locations</h2></div>
-      <div style="padding:16px;display:flex;gap:10px">
-        <input class="form-input" id="search-q" placeholder="Search by name…" style="flex:1" onkeyup="if(event.key==='Enter')searchLocations()">
-        <button class="btn btn-primary" onclick="searchLocations()">Search</button>
-      </div>
-    </div>
-    <div class="panel"><div class="panel-header"><h2 id="loc-title">Results</h2></div>
-    <div id="loc-results"><div class="empty">Search for a location above</div></div></div>`;
+    <div class="panel" style="margin-bottom:16px"><div class="panel-header"><h2>Search Locations</h2></div>
+    <div style="padding:14px;display:flex;gap:10px"><input class="form-input" id="search-q" placeholder="Search by name…" style="flex:1" onkeyup="if(event.key==='Enter')searchLocations()"><button class="btn btn-primary" onclick="searchLocations()">Search</button></div></div>
+    <div class="panel"><div class="panel-header"><h2 id="loc-title">Results</h2></div><div id="loc-results"><div class="empty">Search for a location above</div></div></div>`;
 }
 
 async function searchLocations() {
   const q = document.getElementById('search-q').value.trim();
   if (!q) return;
   document.getElementById('loc-results').innerHTML = '<div class="loading">Searching…</div>';
-  const data = await api(`/admin/search?q=${encodeURIComponent(q)}`);
-  if (!data?.results?.length) {
-    document.getElementById('loc-results').innerHTML = '<div class="empty">No locations found</div>';
-    return;
-  }
-  document.getElementById('loc-title').textContent = `${data.count} result(s)`;
-  const rows = data.results.map(loc => `
-    <tr>
-      <td><strong>${loc.name}</strong><br><span style="color:var(--gray-400);font-size:12px">${loc.address_code}</span></td>
-      <td>${loc.local_name || '—'}</td>
-      <td>${loc.category}</td>
-      <td>${loc.verified ? '<span class="badge badge-green">✅ Verified</span>' : '<span class="badge badge-yellow">Pending</span>'}</td>
-      <td>${loc.upvotes} ▲</td>
-    </tr>`).join('');
-  document.getElementById('loc-results').innerHTML = `
-    <table><thead><tr><th>Name</th><th>Local Name</th><th>Category</th><th>Status</th><th>Votes</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
-}
-
-// ── Workers ───────────────────────────────────────────────────────────────────
-async function renderWorkers() {
-  document.getElementById('content').innerHTML = `
-    <div class="panel">
-      <div class="panel-header"><h2>👥 Registered Field Workers</h2></div>
-      <div class="empty">Worker management coming soon 🌴</div>
-    </div>`;
+  const data = await api('/admin/search?q=' + encodeURIComponent(q));
+  if (!data?.results?.length) { document.getElementById('loc-results').innerHTML = '<div class="empty">No locations found</div>'; return; }
+  document.getElementById('loc-title').textContent = data.count + ' result(s)';
+  const rows = data.results.map(loc => `<tr><td><strong>${loc.name}</strong><br><span style="color:var(--gray-400);font-size:12px">${loc.address_code}</span></td><td>${loc.local_name||'—'}</td><td>${loc.category}</td><td>${loc.verified?'<span class="badge badge-green">✅ Verified</span>':'<span class="badge badge-yellow">Pending</span>'}</td><td>${loc.upvotes} ▲</td></tr>`).join('');
+  document.getElementById('loc-results').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Name</th><th>Local Name</th><th>Category</th><th>Status</th><th>Votes</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 async function approve(id) {
-  if (!confirm('Approve and pay this submission?')) return;
-  const data = await api(`/bounties/${id}/approve`, { method:'POST' });
-  if (data?.message) { toast(`✅ Approved! $${data.reward_sbd} SBD paid`); navigate(currentView); loadSubmissionsBadge(); }
+  if (!confirm('Approve and pay?')) return;
+  const data = await api('/bounties/' + id + '/approve', {method:'POST'});
+  if (data?.message) { toast('✅ $' + data.reward_sbd + ' SBD paid!'); navigate(currentView); loadSubmissionsBadge(); }
   else toast('❌ ' + (data?.error || 'Failed'));
 }
 
 async function loadThumbs(jobId, prefix) {
-  const data = await api(`/admin/bounties/${jobId}/files`);
+  const data = await api('/admin/bounties/' + jobId + '/files');
   const el = document.getElementById((prefix||'thumbs-') + jobId);
   if (!el) return;
   if (!data?.files?.length) { el.innerHTML = '<span style="color:var(--gray-400);font-size:12px">0 files</span>'; return; }
   el.innerHTML = data.files.map(f => {
     const time = new Date(f.created_at).toLocaleString('en-AU', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    if (f.url?.startsWith('data:image')) {
-      return `<div class="thumb-wrap">
-        <img class="thumb" src="${f.url}" title="${time}" onclick="showPhoto('${f.url}','${time}')">
-        <div class="thumb-time">${time}</div>
-      </div>`;
-    }
+    if (f.url?.startsWith('data:image')) return `<div class="thumb-wrap"><img class="thumb" src="${f.url}" title="${time}" onclick="showPhoto(this.src,'${time}')"><div class="thumb-time">${time}</div></div>`;
     return '';
   }).join('');
 }
 
 async function viewFiles(id, title) {
-  const data = await api(`/admin/bounties/${id}/files`);
+  const data = await api('/admin/bounties/' + id + '/files');
   if (!data?.files?.length) { toast('No files yet'); return; }
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:flex;align-items:center;justify-content:center;padding:24px';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:flex;align-items:center;justify-content:center;padding:16px';
   const filesHtml = data.files.map((f,i) => {
     const time = new Date(f.created_at).toLocaleString();
-    const img = f.url?.startsWith('data:') ? `<img src="${f.url}" style="width:100%;height:220px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="showPhoto('${f.url}','${time}')">` : '';
-    return `<div style="margin-bottom:14px;border:1px solid var(--gray-200);border-radius:10px;overflow:hidden">
-      ${img}
-      <div style="padding:10px 14px;background:var(--gray-50)">
-        <div style="font-weight:600;font-size:13px">📸 Photo ${i+1} of ${data.files.length}</div>
-        <div style="color:var(--gray-400);font-size:12px;margin-top:2px">🕐 ${time}</div>
-      </div>
-    </div>`;
+    const img = f.url?.startsWith('data:') ? `<img src="${f.url}" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="showPhoto(this.src,'${time}')">` : '';
+    return `<div style="margin-bottom:12px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden">${img}<div style="padding:10px 14px;background:#f8fafc"><div style="font-weight:600;font-size:13px">📸 Photo ${i+1} of ${data.files.length}</div><div style="color:#94a3b8;font-size:12px;margin-top:2px">🕐 ${time}</div></div></div>`;
   }).join('');
-  overlay.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h2 style="font-family:'Fraunces',serif;font-size:18px">📸 ${title}</h2>
-        <button onclick="this.closest('[style*=fixed]').remove()" style="background:var(--gray-100);border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:'Outfit',sans-serif">✕ Close</button>
-      </div>
-      <p style="color:var(--gray-400);font-size:13px;margin-bottom:16px">${data.files.length} photo(s) in chronological order</p>
-      ${filesHtml}
-    </div>`;
+  overlay.innerHTML = `<div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="font-family:'Fraunces',serif;font-size:17px">📸 ${title}</h2><button onclick="this.closest('[style*=fixed]').remove()" style="background:#f1f5f9;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-family:'Outfit',sans-serif">✕</button></div><p style="color:#94a3b8;font-size:13px;margin-bottom:14px">${data.files.length} photo(s) in order</p>${filesHtml}</div>`;
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
 
 function showPhoto(src, time) {
-  const overlay = document.createElement('div');
-  overlay.className = 'photo-overlay';
-  overlay.innerHTML = `
-    <img src="${src}">
-    <div class="photo-overlay-time">🕐 ${time}</div>
-    <div class="photo-overlay-close">Click anywhere to close</div>`;
-  overlay.addEventListener('click', () => overlay.remove());
-  document.body.appendChild(overlay);
+  const o = document.createElement('div');
+  o.className = 'photo-overlay';
+  o.innerHTML = `<img src="${src}"><div class="photo-overlay-time">🕐 ${time}</div><div style="color:rgba(255,255,255,0.3);font-size:12px;margin-top:8px">Tap to close</div>`;
+  o.addEventListener('click', () => o.remove());
+  document.body.appendChild(o);
 }
 
-function statusBadge(s) {
-  const map = { open:'badge-blue', claimed:'badge-yellow', submitted:'badge-red', approved:'badge-green' };
-  return `<span class="badge ${map[s]||'badge-blue'}">${s}</span>`;
-}
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
+function statusBadge(s) { const m = {open:'badge-blue',claimed:'badge-yellow',submitted:'badge-red',approved:'badge-green'}; return `<span class="badge ${m[s]||'badge-blue'}">${s}</span>`; }
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); }
 function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
-function scrollToDropForm() { document.getElementById('b-title')?.focus(); }
-
-// Watch for drop-map to appear
-var _mapObserver = new MutationObserver(function() {
-  var el = document.getElementById('drop-map');
-  if(el && !el._leaflet_id && typeof L !== 'undefined') {
-    _mapObserver.disconnect();
-    initDropMap();
-  }
-});
-_mapObserver.observe(document.body, {childList: true, subtree: true});
-
-function initDropMap() {
-  if(typeof L === 'undefined') { setTimeout(initDropMap, 200); return; }
-  var el = document.getElementById('drop-map');
-  if(!el || el._leaflet_id) return;
-  window._adminMap = L.map('drop-map').setView([-9.4313,160.0521],13);
-  var dm = window._adminMap;
-  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',{attribution:'© Google',maxZoom:21,maxNativeZoom:21});
-  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{attribution:'© Google',maxZoom:21,maxNativeZoom:21});
-  satellite.addTo(dm);
-  L.control.layers({'🛰️ Satellite+Labels': satellite, '🗺️ Streets': streets},{},{position:'topright'}).addTo(dm);
-  window._adminMarker = null;
-  var dmk = window._adminMarker;
-  fetch('https://laesulia-api.onrender.com/api/v1/bounties?lat=-9.4313&lng=160.0521&radius=100000',{headers:{'Authorization':'Bearer '+localStorage.getItem('laesulia_token')}}).then(r=>r.json()).then(function(d){
-    if(!d||!d.bounties) return;
-    d.bounties.forEach(function(b){
-      var c=b.status==='open'?'#dc2626':b.status==='claimed'?'#d97706':'#16a34a';
-      L.circleMarker([b.lat,b.lng],{radius:8,fillColor:c,color:'white',weight:2,fillOpacity:0.9}).addTo(dm).bindPopup('<b>'+b.title+'</b><br>$'+b.reward_sbd+' SBD');
-    });
-  });
-  setTimeout(function(){ dm.invalidateSize(); }, 100);
-  dm.on('click',function(e){
-    var lat=e.latlng.lat.toFixed(5), lng=e.latlng.lng.toFixed(5);
-    document.getElementById('b-lat').value=lat;
-    document.getElementById('b-lng').value=lng;
-    document.getElementById('drop-coords').textContent='📍 '+lat+', '+lng;
-    document.getElementById('drop-coords').style.color='#16a34a';
-    if(window._adminMarker) window._adminMap.removeLayer(window._adminMarker);
-    window._adminMarker=L.marker([lat,lng]).addTo(window._adminMap);
-    dmk=window._adminMarker;
-  });
-}
-
-async function loadBountiesList() {
-  const data = await api('/bounties?lat=-9.4313&lng=160.0521&radius=100000');
-  if (!data?.bounties?.length) { document.getElementById('bounties-list').innerHTML = '<div class="empty">No bounties yet</div>'; return; }
-  const rows = data.bounties.map(b => `<tr><td><strong>${b.title}</strong></td><td style="color:var(--gray-400);font-size:13px">${b.lat.toFixed(4)}, ${b.lng.toFixed(4)}</td><td><strong>$${b.reward_sbd} SBD</strong></td><td>${b.submit_type}</td><td>${statusBadge(b.status)}</td><td><div style="display:flex;gap:6px">${b.status==='submitted'?`<button class="btn btn-green btn-sm" onclick="approve('${b.id}')">✅ Pay</button>`:''}<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="deleteBounty('${b.id}')">🗑</button></div></td></tr>`).join('');
-  document.getElementById('bounties-list').innerHTML = `<table><thead><tr><th>Title</th><th>Location</th><th>Reward</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
-}
 </script>
 </body>
 </html>
