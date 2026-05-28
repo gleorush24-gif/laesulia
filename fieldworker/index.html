@@ -342,9 +342,14 @@ async function claimBounty(id, title, reward, desc) {
 }
 
 async function claimFromMap(id, title, reward, desc) {
+  if (mapInstance) mapInstance.closePopup();
   const data = await apiFetch('/bounties/' + id + '/claim', {method:'POST'});
-  if (data?.message) { toast('✅ Claimed!'); setTimeout(() => openUpload(id, title, reward, desc), 500); }
-  else toast('❌ ' + (data?.error || 'Already claimed'));
+  if (data?.message) {
+    toast('✅ Claimed! Loading upload screen…');
+    setTimeout(() => openUpload(id, title, reward, desc), 800);
+  } else {
+    toast('❌ ' + (data?.error || 'Already claimed'));
+  }
 }
 
 // ── Upload ────────────────────────────────────────────────────────────────────
