@@ -49,7 +49,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		id, req.Username, req.Email, string(hash), req.Phone,
 	)
 	if err != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username or email already taken"})
+		c.JSON(http.StatusConflict, gin.H{"error": "Registration failed: " + err.Error()})
 		return
 	}
 	token, err := generateToken(id)
