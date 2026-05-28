@@ -169,7 +169,3 @@ func MigratePhone(db *sql.DB) error {
 	return nil
 }
 
-func MigratePhone(db *sql.DB) error {
-	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''`)
-	return nil
-}
