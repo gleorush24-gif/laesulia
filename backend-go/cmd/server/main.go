@@ -26,11 +26,11 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 	if err := database.MigrateBounty(db); err != nil {
-		database.MigrateBase64(db)
-		database.MigrateAdmin(db)
-	database.MigratePhone(db)
 		log.Fatalf("Failed to run bounty migrations: %v", err)
 	}
+	database.MigrateBase64(db)
+	database.MigrateAdmin(db)
+	database.MigratePhone(db)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
