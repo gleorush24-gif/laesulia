@@ -253,12 +253,12 @@ func (h *BountyHandler) GetWallet(c *gin.Context) {
 func (h *BountyHandler) GetSubmitted(c *gin.Context) {
 	rows, err := h.db.Query(`
 		SELECT j.id, j.title, j.lat, j.lng, j.reward_sbd, j.submit_type,
-			j.submitted_at, u.username, COUNT(s.id) AS file_count
+			j.submitted_at, u.username, COALESCE(u.phone,'') as phone, COUNT(s.id) AS file_count
 		FROM bounty_jobs j
 		JOIN users u ON u.id = j.claimed_by
 		LEFT JOIN bounty_submissions s ON s.job_id = j.id
 		WHERE j.status = 'submitted'
-		GROUP BY j.id, u.username
+		GROUP BY j.id, u.username, u.phone
 		ORDER BY j.submitted_at DESC
 	`)
 	if err != nil {
