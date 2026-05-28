@@ -298,7 +298,7 @@ async function renderDashboard() {
       <div id="dash-submissions"><div class="loading">Loading…</div></div>
     </div>`;
   if (!sd?.jobs?.length) { document.getElementById('dash-submissions').innerHTML = '<div class="empty">No pending submissions</div>'; return; }
-  const rows = sd.jobs.slice(0,5).map(j => `<tr><td><strong>${j.title}</strong><br><span style="color:var(--gray-400);font-size:12px">by ${j.username}</span></td><td><span id="dash-thumbs-${j.id}">…</span></td><td><strong>$${j.reward_sbd} SBD</strong></td><td><button class="btn btn-green btn-sm" onclick="approve('${j.id}')">✅ Pay</button></td></tr>`).join('');
+  const rows = sd.jobs.slice(0,5).map(j => `<tr><td><strong>${j.title}</strong><br><span style="color:var(--gray-400);font-size:12px">by ${j.username}</span></td><td><span id="dash-thumbs-${j.id}">…</span></td><td><strong>$${j.reward_sbd} SBD</strong></td><td><button class="btn btn-green btn-sm" onclick="approve('${j.id}','${j.phone||'no phone'}',${j.reward_sbd})">✅ Pay $${j.reward_sbd}</button></td></tr>`).join('');
   document.getElementById('dash-submissions').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Job</th><th>Photos</th><th>Reward</th><th>Action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   sd.jobs.slice(0,5).forEach(j => loadThumbs(j.id, 'dash-thumbs-'));
 }
@@ -437,8 +437,8 @@ async function searchLocations() {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-async function approve(id) {
-  if (!confirm('Approve and pay?')) return;
+async function approve(id, phone, amount) {
+  if (!confirm('Approve and pay $' + (amount||'?') + ' SBD to mobile: ' + (phone||'unknown') + '?')) return;
   const data = await api('/bounties/' + id + '/approve', {method:'POST'});
   if (data?.message) { toast('✅ $' + data.reward_sbd + ' SBD paid!'); navigate(currentView); loadSubmissionsBadge(); }
   else toast('❌ ' + (data?.error || 'Failed'));
