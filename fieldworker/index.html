@@ -175,6 +175,7 @@
     <div class="navbar-links">
       <button class="nav-link active" id="nav-map" onclick="navigate('map')">🗺️ Map</button>
       <button class="nav-link" id="nav-bounties" onclick="navigate('bounties')">🎯 Bounties</button>
+      <button class="nav-link" id="nav-treasure" onclick="navigate('treasure')">🏴 Treasure</button>
       <button class="nav-link" id="nav-wallet" onclick="navigate('wallet')">💰 Wallet</button>
       <button class="nav-link" id="nav-navigate" onclick="navigate('navigate')">🧭 Navigate</button>
       <button class="nav-link" id="nav-profile" onclick="navigate('profile')">👤 Profile</button>
@@ -189,6 +190,7 @@
   <div class="mobile-menu" id="mobile-menu">
     <button class="mobile-nav-link" id="mnav-map" onclick="navigate('map');toggleMenu()">🗺️ Map</button>
     <button class="mobile-nav-link" id="mnav-bounties" onclick="navigate('bounties');toggleMenu()">🎯 Bounties</button>
+    <button class="mobile-nav-link" id="mnav-treasure" onclick="navigate('treasure');toggleMenu()">🏴 Treasure</button>
     <button class="mobile-nav-link" id="mnav-wallet" onclick="navigate('wallet');toggleMenu()">💰 Wallet</button>
     <button class="mobile-nav-link" id="mnav-navigate" onclick="navigate('navigate');toggleMenu()">🧭 Navigate</button>
     <button class="mobile-nav-link" id="mnav-profile" onclick="navigate('profile');toggleMenu()">👤 Profile</button>
@@ -285,7 +287,7 @@ async function apiFetch(path, options = {}) {
 
 function navigate(view) {
   currentView = view;
-  ['map','bounties','wallet','profile','navigate'].forEach(v => {
+  ['map','bounties','wallet','profile','navigate','treasure'].forEach(v => {
     const el = document.getElementById('nav-'+v);
     const mel = document.getElementById('mnav-'+v);
     if (el) el.classList.toggle('active', v === view);
@@ -296,6 +298,7 @@ function navigate(view) {
   else if (view === 'wallet') renderWallet();
   else if (view === 'profile') renderProfile();
   else if (view === 'navigate') renderNavigate();
+  else if (view === 'treasure') renderTreasure();
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
@@ -394,7 +397,7 @@ function renderUploadScreen() {
       ${uploadedFiles.length < required ? `<button class="add-photo-btn" onclick="document.getElementById('file-input').click()">📷 Add Photo (${uploadedFiles.length}/${required})</button>` : ''}
       ${uploadedFiles.length >= required ? `<button class="bounty-btn submit" onclick="submitBounty()" id="submit-btn">✅ Submit for Review — $${b.reward} SBD</button>` : ''}
     </div>`;
-  ['map','bounties','wallet','profile','navigate'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
+  ['map','bounties','wallet','profile','navigate','treasure'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
 }
 
 async function handleFileSelect(e) {
@@ -736,6 +739,95 @@ function stopNavTracking() {
     navigator.geolocation.clearWatch(navWatchId);
     navWatchId = null;
   }
+}
+
+
+// ── Treasure Hunt Tab ─────────────────────────────────────────────────────────
+let currentHunt = null;
+let currentAttempt = null;
+let currentQuestions = [];
+
+async function renderTreasure() {
+  document.getElementById('content').innerHTML = '<div style="padding:32px;text-align:center;color:#94a3b8">Loading...</div>';
+  const data = await apiFetch('/treasure');
+  const hunts = data?.hunts || [];
+  if (!hunts.length) {
+    document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center"><div style="text-align:center;color:white"><div style="font-size:64px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;margin-top:12px">No Active Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px">Check back soon!</div></div></div>';
+    return;
+  }
+  let html = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:24px 16px 16px;text-align:center"><div style="font-size:48px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;color:white;margin-top:8px">Treasure Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">Answer clues. Find the treasure. Win prizes!</div></div><div style="padding:16px;max-width:600px;margin:0 auto">';
+  hunts.forEach(h => {
+    html += '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1)"><div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase">Active Hunt</div><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:white;margin-top:4px">' + h.title + '</div></div><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;text-align:center"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:white">$' + h.prize_value_sbd + '</div><div style="font-size:10px;color:rgba(255,255,255,0.7)">SBD Prize</div></div></div><div style="padding:16px"><p style="font-size:14px;color:#475569;margin-bottom:12px">' + (h.description||'') + '</p><div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">🎁 Prize</div><div style="font-size:14px;font-weight:600">' + (h.prize_description||'Special prize!') + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">📍 Collect at: ' + (h.shop_name||'TBA') + '</div></div><button onclick="startHunt(' + JSON.stringify(h.id) + ',' + JSON.stringify(h.title) + ',' + h.max_finalists + ')" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🏴\u200d☠️ Start Hunt!</button></div></div>';
+  });
+  html += '</div>';
+  document.getElementById('content').innerHTML = html;
+}
+
+async function startHunt(huntId, huntTitle, maxFinalists) {
+  const attempt = await apiFetch('/treasure/' + huntId + '/start', {method:'POST'});
+  if (!attempt) return;
+  if (attempt.status === 'eliminated') { showTreasureMsg('😔 Eliminated', 'All finalist spots taken. Better luck next time!', '#dc2626'); return; }
+  if (attempt.status === 'finalist') { showFinalistScreen(huntId, huntTitle); return; }
+  if (attempt.status === 'winner') { showWinnerScreen(huntTitle); return; }
+  const qData = await apiFetch('/treasure/' + huntId + '/questions');
+  currentQuestions = qData?.questions || [];
+  currentHunt = {id: huntId, title: huntTitle, maxFinalists};
+  currentAttempt = attempt;
+  if (!currentQuestions.length) { showTreasureMsg('⚠️ No Questions', 'This hunt has no questions yet!', '#d97706'); return; }
+  showQuestion(attempt.current_question);
+}
+
+function showQuestion(qi) {
+  if (qi >= currentQuestions.length) { showFinalistScreen(currentHunt.id, currentHunt.title); return; }
+  const q = currentQuestions[qi];
+  const progress = (qi / currentQuestions.length) * 100;
+  const diffEmoji = q.difficulty==='easy'?'🟢':q.difficulty==='medium'?'🟡':'🔴';
+  let opts = q.options.map((o,i) => '<button onclick="submitAns(' + JSON.stringify(currentHunt.id) + ',' + JSON.stringify(q.id) + ',' + JSON.stringify(o) + ',this)" style="width:100%;padding:14px;margin-bottom:10px;background:white;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;text-align:left"><span style="display:inline-block;width:28px;height:28px;background:#f1f5f9;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;margin-right:10px">' + String.fromCharCode(65+i) + '</span>' + o + '</button>').join('');
+  document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:20px 16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><button onclick="renderTreasure()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:6px 12px;color:white;font-family:Outfit,sans-serif;cursor:pointer;font-size:13px">← Back</button><span style="color:rgba(255,255,255,0.7);font-size:13px">Q' + (qi+1) + ' of ' + currentQuestions.length + '</span><span style="font-size:12px;font-weight:700;padding:4px 8px;border-radius:20px;background:rgba(255,255,255,0.15);color:white">' + diffEmoji + ' ' + q.difficulty + '</span></div><div style="background:rgba(255,255,255,0.1);border-radius:8px;height:6px;overflow:hidden"><div style="background:#7c3aed;height:100%;border-radius:8px;width:' + progress + '%"></div></div></div><div style="padding:20px 16px;max-width:600px;margin:0 auto"><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:#1e293b;margin-bottom:20px;line-height:1.4">' + q.question + '</div>' + opts + '<div id="ans-result" style="margin-top:12px"></div></div>';
+}
+
+async function submitAns(huntId, qId, answer, btn) {
+  document.querySelectorAll('[onclick^="submitAns"]').forEach(b => b.disabled = true);
+  btn.style.background = '#f1f5f9';
+  const data = await apiFetch('/treasure/' + huntId + '/answer', {method:'POST', body: JSON.stringify({question_id:qId, answer:answer})});
+  if (!data) return;
+  const res = document.getElementById('ans-result');
+  if (data.correct) {
+    btn.style.background = '#dcfce7'; btn.style.borderColor = '#16a34a'; btn.style.color = '#166534';
+    if (data.finalist) {
+      res.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:16px;text-align:center"><div style="font-size:32px">🏆</div><div style="font-weight:700;color:#166534;font-size:16px;margin-top:8px">You are a FINALIST!</div></div>';
+      setTimeout(() => showFinalistScreen(huntId, currentHunt.title), 2000);
+    } else if (data.eliminated) {
+      res.innerHTML = '<div style="background:#fee2e2;border-radius:12px;padding:16px;text-align:center"><div style="font-size:32px">😔</div><div style="font-weight:700;color:#991b1b">All finalist spots taken!</div></div>';
+    } else {
+      res.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:14px"><div style="font-weight:700;color:#166534;margin-bottom:6px">✅ Correct!</div><div style="font-size:14px;color:#166534">🗺️ Clue: ' + (data.clue||'') + '</div>' + (data.clue_lat ? '<div style="font-size:12px;color:#166534;margin-top:4px">📍 ' + parseFloat(data.clue_lat).toFixed(4) + ', ' + parseFloat(data.clue_lng).toFixed(4) + '</div>' : '') + '</div>';
+      currentAttempt.current_question++;
+      setTimeout(() => showQuestion(currentAttempt.current_question), 2500);
+    }
+  } else {
+    btn.style.background = '#fee2e2'; btn.style.borderColor = '#dc2626'; btn.style.color = '#991b1b';
+    res.innerHTML = '<div style="background:#fee2e2;border-radius:12px;padding:12px;text-align:center;color:#991b1b;font-weight:600">❌ Wrong! Try again.</div>';
+    setTimeout(() => { document.querySelectorAll('[onclick^="submitAns"]').forEach(b => { b.disabled=false; b.style.background='white'; b.style.borderColor='#e2e8f0'; b.style.color='#1e293b'; }); res.innerHTML=''; }, 1500);
+  }
+}
+
+async function showFinalistScreen(huntId, huntTitle) {
+  const data = await apiFetch('/treasure/' + huntId + '/finalists');
+  const finalists = data?.finalists || [];
+  document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:32px 20px;text-align:center;color:white"><div style="font-size:56px">🏆</div><div style="font-family:Fraunces,serif;font-size:26px;font-weight:700;margin-top:12px">You made the Finals!</div><div style="color:rgba(255,255,255,0.7);font-size:14px;margin-top:6px">' + huntTitle + '</div></div><div style="padding:20px 16px;max-width:600px;margin:0 auto"><div style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #e2e8f0"><div style="font-size:16px;font-weight:700;margin-bottom:12px">🎲 Final Challenge — Lucky Bet!</div><p style="font-size:14px;color:#475569;margin-bottom:16px">Place your bet on the sports result. If you are right, you advance!</p><div style="font-weight:700;font-size:15px;margin-bottom:12px">🏉 State of Origin 2026</div><button onclick="placeBet(' + JSON.stringify(huntId) + ',' + JSON.stringify('Queensland Maroons') + ')" style="width:100%;padding:14px;margin-bottom:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🟣 Queensland Maroons</button><button onclick="placeBet(' + JSON.stringify(huntId) + ',' + JSON.stringify('NSW Blues') + ')" style="width:100%;padding:14px;background:linear-gradient(135deg,#0066cc,#0044aa);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🔵 NSW Blues</button></div><div style="background:#f8fafc;border-radius:12px;padding:16px"><div style="font-weight:700;margin-bottom:10px">👥 Finalists (' + finalists.length + ')</div>' + finalists.map((f,i) => '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e2e8f0"><span style="font-size:18px">' + ['🥇','🥈','🥉','4️⃣','5️⃣'][i] + '</span><span style="font-weight:600">' + f.username + '</span></div>').join('') + '</div></div>';
+}
+
+async function placeBet(huntId, option) {
+  const data = await apiFetch('/treasure/' + huntId + '/bet', {method:'POST', body: JSON.stringify({bet_option:option})});
+  if (data?.message) toast('🎲 Bet placed on ' + option + '! Waiting for result…');
+}
+
+function showWinnerScreen(huntTitle) {
+  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);background:linear-gradient(135deg,#d97706,#b45309);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center;color:white"><div style="font-size:80px">🏆</div><div style="font-family:Fraunces,serif;font-size:32px;font-weight:700;margin-top:16px">YOU WON!</div><div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px">' + huntTitle + '</div><div style="background:rgba(255,255,255,0.2);border-radius:16px;padding:20px;margin-top:24px"><div style="font-size:14px">Go collect your prize at the shop!</div><div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px">Show this screen to the shop owner</div></div></div></div>';
+}
+
+function showTreasureMsg(title, msg, color) {
+  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:' + color + '">' + title + '</div><div style="font-size:14px;color:#475569;margin-top:8px;max-width:280px;margin:8px auto 0">' + msg + '</div><button onclick="renderTreasure()" style="margin-top:20px;padding:12px 24px;background:' + color + ';color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to Hunts</button></div></div>';
 }
 
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
