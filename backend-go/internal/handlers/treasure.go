@@ -230,7 +230,7 @@ func (h *TreasureHandler) SubmitAnswer(c *gin.Context) {
 			h.db.QueryRow(`SELECT COUNT(*) FROM treasure_attempts WHERE hunt_id::text=$1 AND status='finalist'`, huntID).Scan(&finalistCount)
 			h.db.QueryRow(`SELECT max_finalists FROM treasure_hunts WHERE id::text=$1`, huntID).Scan(&maxFinalists)
 			h.db.Exec(`UPDATE treasure_attempts SET status='winner', completed_at=NOW() WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID)
-			h.db.Exec(`UPDATE treasure_hunts SET status='completed', winner_id=$1 WHERE id::text=$2`, userID, huntID)
+			// Hunt stays active for others to play; only attempt is marked as winner
 			var winnerName string
 			h.db.QueryRow(`SELECT username FROM users WHERE id::text=$1`, userID).Scan(&winnerName)
 			c.JSON(http.StatusOK, gin.H{"correct": true, "winner": true, "message": "🏆 You answered all questions correctly! You are the winner!"})
