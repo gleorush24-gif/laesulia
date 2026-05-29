@@ -651,10 +651,10 @@ async function showTreasureTab() {
       </div>
       <div id="t-map" style="border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)"></div>
     </div>
-    <div id="t-questions" style="margin-top:20px">
+    <div id="t-questions" style="margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
       <div style="background:white;border-radius:12px;padding:20px;border:2px solid #10b981">
         <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;color:#10b981">Load Sample Questions</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
           <select id="q-subject" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
             <option value="">Subject</option>
             <option value="Science">Science</option>
@@ -667,10 +667,10 @@ async function showTreasureTab() {
             <option value="si">SI Database</option>
             <option value="opentrivia">Open Trivia</option>
           </select>
-          <button onclick="loadSampleQuestions()" style="padding:10px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer">📚 Load Questions</button>
         </div>
-        <div id="q-samples"></div>
+        <button onclick="loadSampleQuestions()" style="width:100%;padding:10px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:12px">📚 Load Questions</button>
       </div>
+      <div id="q-samples" style="background:#f0fdf4;border-radius:12px;padding:20px;border:2px solid #10b981;max-height:400px;overflow-y:auto"></div>
     </div>
     <div style="background:white;border-radius:12px;padding:20px;margin-top:20px">
       <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Active Hunts</h3>
