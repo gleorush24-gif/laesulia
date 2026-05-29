@@ -28,6 +28,9 @@ func main() {
 	if err := database.MigrateBounty(db); err != nil {
 		log.Fatalf("Failed to run bounty migrations: %v", err)
 	}
+	if err := database.InitSIQuestionsTable(db); err != nil {
+		log.Fatalf("Failed to init SI questions: %v", err)
+	}
 	database.MigrateBase64(db)
 	database.MigrateAdmin(db)
 	database.MigratePhone(db)
