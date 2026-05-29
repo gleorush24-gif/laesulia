@@ -652,8 +652,14 @@ function initQMap() {
 async function addQuestion() {
   if (!tHuntId) { alert('Create hunt first'); return; }
   const token = localStorage.getItem('laesulia_token');
-  const options = [document.getElementById('q-a').value, document.getElementById('q-b').value, document.getElementById('q-c').value, document.getElementById('q-d').value];
-  const selectedLetter = document.getElementById('q-ans').value;
+  const qa = document.getElementById('q-a');
+  const qb = document.getElementById('q-b');
+  const qc = document.getElementById('q-c');
+  const qd = document.getElementById('q-d');
+  const qans = document.getElementById('q-ans');
+  if (!qa || !qb || !qc || !qd || !qans) { alert('Form not ready - wait a moment and try again'); return; }
+  const options = [qa.value, qb.value, qc.value, qd.value];
+  const selectedLetter = qans.value;
   const correctIndex = ['A','B','C','D'].indexOf(selectedLetter);
   const correctText = options[correctIndex];
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure/' + tHuntId + '/questions', {
