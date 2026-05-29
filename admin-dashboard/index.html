@@ -260,7 +260,7 @@ async function api(path, options = {}) {
 
 function navigate(view) {
   currentView = view;
-  ['dashboard','bounties','submissions','approved','locations'].forEach(v => {
+  ['dashboard','bounties','submissions','approved','locations','treasure'].forEach(v => {
     const el = document.getElementById('nav-'+v);
     const mel = document.getElementById('mnav-'+v);
     if (el) el.classList.toggle('active', v === view);
