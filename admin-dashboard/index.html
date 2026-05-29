@@ -483,7 +483,6 @@ function showPhoto(src, time) {
 function statusBadge(s) { const m = {open:'badge-blue',claimed:'badge-yellow',submitted:'badge-red',approved:'badge-green'}; return `<span class="badge ${m[s]||'badge-blue'}">${s}</span>`; }
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); }
 function esc(s) { return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
-</script>
 
 
 </script>
@@ -592,7 +591,6 @@ document.addEventListener('DOMContentLoaded', function() {
     nav.appendChild(btn);
   }
 });
-</script>
 
 </body>
 </html>
