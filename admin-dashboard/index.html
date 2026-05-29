@@ -580,17 +580,5 @@ async function loadTreasureHunts() {
 }
 
 // Add tab nav
-document.addEventListener('DOMContentLoaded', function() {
-  const nav = document.querySelector('nav');
-  if (nav && !document.getElementById('nav-t')) {
-    const btn = document.createElement('button');
-    btn.id = 'nav-t';
-    btn.textContent = 'Treasure';
-    btn.onclick = showTreasureTab;
-    btn.style.cssText = 'padding:8px 16px;background:none;border:none;color:white;cursor:pointer;font-weight:600';
-    nav.appendChild(btn);
-  }
-});
-
 </body>
 </html>
