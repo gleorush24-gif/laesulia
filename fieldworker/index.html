@@ -593,7 +593,7 @@ function startNavTracking() {
       }
     },
     function(err) {
-      document.getElementById('nav-status').textContent = '❌ GPS error: ' + err.message;
+      document.getElementById('nav-status').textContent = '📍 Using default location - tap map to navigate';
     },
     {
       enableHighAccuracy: true,
