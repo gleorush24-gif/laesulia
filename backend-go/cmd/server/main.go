@@ -89,6 +89,7 @@ func main() {
                 api.POST("/treasure/:id/resolve-bet", treasure.ResolveBet)
                 api.GET("/treasure/:id/finalists", treasure.GetFinalists)
                 api.POST("/treasure/:id/winner", treasure.DeclareWinner)
+                api.POST("/treasure/:id/reset", treasure.ResetAttempt)
 	}
 
 	port := os.Getenv("PORT")

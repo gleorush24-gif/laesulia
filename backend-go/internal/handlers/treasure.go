@@ -350,3 +350,12 @@ func splitJSON(s string) []string {
 	if current != "" { result = append(result, current) }
 	return result
 }
+
+// Reset attempt (for testing)
+func (h *TreasureHandler) ResetAttempt(c *gin.Context) {
+	huntID := c.Param("id")
+	userID := c.GetString("user_id")
+	h.db.Exec(`DELETE FROM treasure_attempts WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID)
+	h.db.Exec(`UPDATE treasure_hunts SET status='active', winner_id=NULL WHERE id::text=$1`, huntID)
+	c.JSON(http.StatusOK, gin.H{"message": "Attempt reset!"})
+}
