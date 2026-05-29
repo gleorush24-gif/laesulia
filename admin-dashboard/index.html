@@ -38,6 +38,13 @@ async function loadSampleQuestions() {
 }
 
 function selectQuestion(i) {
+  const els = ['q-text-input', 'q-a-input', 'q-b-input', 'q-c-input', 'q-d-input', 'q-ans-input', 'q-clue-input'];
+  const missing = els.filter(id => !document.getElementById(id));
+  if (missing.length > 0) {
+    alert('Create a hunt first, then add questions!');
+    return;
+  }
+  
   const q = window.selectedQuestions[i];
   document.getElementById('q-text-input').value = q.question;
   document.getElementById('q-a-input').value = q.options[0] || '';
@@ -564,6 +571,13 @@ async function loadSampleQuestions() {
 }
 
 function selectQuestion(i) {
+  const els = ['q-text-input', 'q-a-input', 'q-b-input', 'q-c-input', 'q-d-input', 'q-ans-input', 'q-clue-input'];
+  const missing = els.filter(id => !document.getElementById(id));
+  if (missing.length > 0) {
+    alert('Create a hunt first, then add questions!');
+    return;
+  }
+  
   const q = window.selectedQuestions[i];
   document.getElementById('q-text-input').value = q.question;
   document.getElementById('q-a-input').value = q.options[0] || '';
@@ -851,6 +865,13 @@ async function loadSampleQuestions() {
 }
 
 function selectQuestion(i) {
+  const els = ['q-text-input', 'q-a-input', 'q-b-input', 'q-c-input', 'q-d-input', 'q-ans-input', 'q-clue-input'];
+  const missing = els.filter(id => !document.getElementById(id));
+  if (missing.length > 0) {
+    alert('Create a hunt first, then add questions!');
+    return;
+  }
+  
   const q = window.selectedQuestions[i];
   document.getElementById('q-text-input').value = q.question;
   document.getElementById('q-a-input').value = q.options[0] || '';
