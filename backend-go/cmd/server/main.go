@@ -57,6 +57,9 @@ func main() {
 	treasure := handlers.NewTreasureHandler(db)
 	r.GET("/api/v1/bounties", bounty.List)
 	r.GET("/api/v1/treasure", treasure.List)
+	// Question endpoints — public, no auth needed
+	r.GET("/api/v1/questions/si", handlers.GetSIQuestions)
+	r.GET("/api/v1/questions/opentrivia", handlers.GetOpenTriviaQuestions)
 
 	// Protected — must be logged in
 	api := r.Group("/api/v1", middleware.Auth())
