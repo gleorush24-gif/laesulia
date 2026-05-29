@@ -530,7 +530,7 @@ function renderNavigate() {
 function initNavMap() {
   if (typeof L === 'undefined') { setTimeout(initNavMap, 200); return; }
   const el = document.getElementById('nav-map');
-  if (!el) return;
+  if (!el) return; if (navMap) { navMap.remove(); navMap = null; }
 
   navMap = L.map('nav-map').setView([-9.4313, 160.0521], 14);
   
