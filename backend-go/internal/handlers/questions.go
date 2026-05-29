@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 
@@ -17,8 +18,16 @@ type Question struct {
 	Difficulty    string   `json:"difficulty"`
 }
 
+type QuestionHandler struct {
+	db *sql.DB
+}
+
+func NewQuestionHandler(db *sql.DB) *QuestionHandler {
+	return &QuestionHandler{db: db}
+}
+
 // GetSIQuestions returns questions from SI database
-func GetSIQuestions(c *gin.Context) {
+func (h *QuestionHandler) GetSI(c *gin.Context) {
 	subject := c.Query("subject")
 	gradeLevel := c.Query("grade_level")
 	
@@ -33,7 +42,7 @@ func GetSIQuestions(c *gin.Context) {
 	}
 	query += ` ORDER BY RANDOM() LIMIT 5`
 	
-	rows, err := db.Query(query)
+	rows, err := h.db.Query(query)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -54,8 +63,8 @@ func GetSIQuestions(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"questions": questions})
 }
 
-// GetOpenTriviaQuestions fetches from Open Trivia API
-func GetOpenTriviaQuestions(c *gin.Context) {
+// GetOpenTrivia fetches from Open Trivia API
+func (h *QuestionHandler) GetOpenTrivia(c *gin.Context) {
 	subject := c.Query("subject")
 	difficulty := c.DefaultQuery("difficulty", "easy")
 	

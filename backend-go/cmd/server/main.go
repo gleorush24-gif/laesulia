@@ -55,11 +55,12 @@ func main() {
 	// Public bounties — anyone can see open bounty pins
 	bounty := handlers.NewBountyHandler(db)
 	treasure := handlers.NewTreasureHandler(db)
+	questions := handlers.NewQuestionHandler(db)
 	r.GET("/api/v1/bounties", bounty.List)
 	r.GET("/api/v1/treasure", treasure.List)
 	// Question endpoints — public, no auth needed
-	r.GET("/api/v1/questions/si", handlers.GetSIQuestions)
-	r.GET("/api/v1/questions/opentrivia", handlers.GetOpenTriviaQuestions)
+	r.GET("/api/v1/questions/si", questions.GetSI)
+	r.GET("/api/v1/questions/opentrivia", questions.GetOpenTrivia)
 
 	// Protected — must be logged in
 	api := r.Group("/api/v1", middleware.Auth())
