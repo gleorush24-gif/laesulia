@@ -521,24 +521,151 @@ window.navigate = function(tab) {
   }
 };
 
+let tMap = null;
+let tMarker = null;
+let tLat = null;
+let tLng = null;
+let tHuntId = null;
+
 async function showTreasureTab() {
-  try {
-    const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure');
-    const data = await res.json();
-    const hunts = data?.hunts || [];
-    let html = '<h2 style="font-family:Fraunces,serif;font-size:28px;font-weight:700;margin-bottom:20px">Treasure Hunts</h2><div style="background:white;border-radius:12px;padding:20px">';
-    if (hunts.length) {
-      hunts.forEach(h => {
-        html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:8px"><div style="font-weight:700">' + h.title + '</div><div style="font-size:13px;color:#94a3b8">$' + h.prize_value_sbd + ' SBD • ' + h.shop_name + '</div></div>';
-      });
-    } else {
-      html += '<p style="color:#94a3b8">No active hunts</p>';
-    }
-    html += '</div>';
-    document.getElementById('content').innerHTML = html;
-  } catch(e) { 
-    document.getElementById('content').innerHTML = '<p style="color:red">Error loading hunts</p>';
+  const html = `
+    <h2 style="font-family:Fraunces,serif;font-size:28px;font-weight:700;margin-bottom:20px">Treasure Hunts</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="background:white;border-radius:12px;padding:20px">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Create Treasure Hunt</h3>
+        <input type="text" id="t-title" placeholder="Hunt title" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+        <input type="text" id="t-desc" placeholder="Description" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+        <input type="number" id="t-sbd" placeholder="Prize (SBD)" step="0.01" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+        <input type="text" id="t-shop" placeholder="Shop name" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+        <input type="text" id="t-contact" placeholder="Shop contact" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+        <div id="t-coords" style="background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:10px;font-size:13px;color:#475569">📍 Click map to drop pin</div>
+        <button onclick="createTreasureHunt()" style="width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer">Create Hunt</button>
+      </div>
+      <div id="t-map" style="border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1)"></div>
+    </div>
+    <div id="t-questions" style="margin-top:20px"></div>
+    <div style="background:white;border-radius:12px;padding:20px;margin-top:20px">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Active Hunts</h3>
+      <div id="t-list"></div>
+    </div>
+  `;
+  document.getElementById('content').innerHTML = html;
+  setTimeout(() => {
+    initTMap();
+    loadTHunts();
+  }, 100);
+}
+
+function initTMap() {
+  const el = document.getElementById('t-map');
+  if (!el || tMap) return;
+  tMap = L.map('t-map').setView([-9.4313, 160.0521], 14);
+  L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'Google', maxZoom:21}).addTo(tMap);
+  tMap.on('click', function(e) {
+    tLat = e.latlng.lat;
+    tLng = e.latlng.lng;
+    if (tMarker) tMap.removeLayer(tMarker);
+    tMarker = L.marker([tLat, tLng]).addTo(tMap);
+    document.getElementById('t-coords').textContent = 'Lat: ' + tLat.toFixed(4) + ', Lng: ' + tLng.toFixed(4);
+  });
+}
+
+async function createTreasureHunt() {
+  if (!tLat || !tLng) { alert('Drop pin on map'); return; }
+  const token = localStorage.getItem('token');
+  const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+    body: JSON.stringify({
+      title: document.getElementById('t-title').value,
+      description: document.getElementById('t-desc').value,
+      prize_description: 'Prize',
+      prize_value_sbd: parseFloat(document.getElementById('t-sbd').value) || 0,
+      shop_name: document.getElementById('t-shop').value,
+      shop_contact: document.getElementById('t-contact').value,
+      lat: tLat, lng: tLng
+    })
+  });
+  const data = await res.json();
+  if (data?.id) {
+    tHuntId = data.id;
+    showAddQuestions();
+    document.getElementById('t-title').value = '';
+    document.getElementById('t-desc').value = '';
+    document.getElementById('t-sbd').value = '';
+    if (tMarker) tMap.removeLayer(tMarker);
+    tLat = null;
+    tLng = null;
+    loadTHunts();
   }
+}
+
+function showAddQuestions() {
+  const html = `
+    <div style="background:white;border-radius:12px;padding:20px">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Add Questions</h3>
+      <input type="text" id="q-text" placeholder="Question" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+        <input type="text" id="q-a" placeholder="A" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+        <input type="text" id="q-b" placeholder="B" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+        <input type="text" id="q-c" placeholder="C" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+        <input type="text" id="q-d" placeholder="D" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <select id="q-ans" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <select id="q-diff" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif"><option>easy</option><option>medium</option><option>hard</option></select>
+      </div>
+      <input type="text" id="q-clue" placeholder="Clue after correct answer" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px;font-family:Outfit,sans-serif">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <input type="number" id="q-lat" placeholder="Clue Lat" step="0.0001" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+        <input type="number" id="q-lng" placeholder="Clue Lng" step="0.0001" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-family:Outfit,sans-serif">
+      </div>
+      <button onclick="addQuestion()" style="width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:10px">+ Add Question</button>
+      <button onclick="launchHunt()" style="width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer">🚀 Launch Hunt</button>
+    </div>
+  `;
+  document.getElementById('t-questions').innerHTML = html;
+}
+
+async function addQuestion() {
+  if (!tHuntId) { alert('Create hunt first'); return; }
+  const token = localStorage.getItem('token');
+  const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure/' + tHuntId + '/questions', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+    body: JSON.stringify({
+      question: document.getElementById('q-text').value,
+      options: [document.getElementById('q-a').value, document.getElementById('q-b').value, document.getElementById('q-c').value, document.getElementById('q-d').value],
+      correct_answer: document.getElementById('q-ans').value,
+      clue_after: document.getElementById('q-clue').value,
+      clue_lat: parseFloat(document.getElementById('q-lat').value) || null,
+      clue_lng: parseFloat(document.getElementById('q-lng').value) || null,
+      order_num: 1,
+      difficulty: document.getElementById('q-diff').value
+    })
+  });
+  if (await res.json()) {
+    alert('Question added!');
+    document.getElementById('q-text').value = '';
+    ['q-a','q-b','q-c','q-d','q-clue','q-lat','q-lng'].forEach(id => document.getElementById(id).value = '');
+  }
+}
+
+function launchHunt() {
+  alert('Hunt is live! Field workers can now play it.');
+  tHuntId = null;
+  showTreasureTab();
+}
+
+async function loadTHunts() {
+  const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure');
+  const data = await res.json();
+  const hunts = data?.hunts || [];
+  let html = '';
+  hunts.forEach(h => {
+    html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:8px"><div style="font-weight:700">' + h.title + '</div><div style="font-size:13px;color:#94a3b8">$' + h.prize_value_sbd + ' SBD • ' + h.shop_name + '</div></div>';
+  });
+  document.getElementById('t-list').innerHTML = html || '<p style="color:#94a3b8">No active hunts</p>';
 }
 
 </script>
