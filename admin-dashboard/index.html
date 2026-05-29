@@ -621,7 +621,7 @@ function showAddQuestions() {
   html += '</div>';
   html += '<input type="text" id="q-clue-input" placeholder="Clue text" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px">';
   html += '<div id="q-coords-display" style="background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:10px;font-size:13px">📍 Click map</div>';
-  html += '<button onclick="addQWithMap()" style="width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:10px">+ Add Question</button>';
+  html += '<button onclick="addQuestion()" style="width:100%;padding:10px;background:#7c3aed;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:10px">+ Add Question</button>';
   html += '<button onclick="launchHunt()" style="width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer">🚀 Launch Hunt</button>';
   html += '</div><div style="margin-top:20px"><div id="q-map" style="height:350px;border-radius:12px"></div></div>';
   document.getElementById('t-questions').innerHTML = html;
@@ -646,37 +646,47 @@ function initQMap() {
 
 async function addQuestion() {
   if (!tHuntId) { alert('Create hunt first'); return; }
+  if (!qCloneLat || !qCloneLng) { alert('Drop pin on map'); return; }
   const token = localStorage.getItem('laesulia_token');
-  const qa = document.getElementById('q-a');
-  const qb = document.getElementById('q-b');
-  const qc = document.getElementById('q-c');
-  const qd = document.getElementById('q-d');
-  const qans = document.getElementById('q-ans');
-  if (!qa || !qb || !qc || !qd || !qans) { alert('Form not ready - wait a moment and try again'); return; }
-  const options = [qa.value, qb.value, qc.value, qd.value];
-  const selectedLetter = qans.value;
+  const qa = document.getElementById('q-a-input').value;
+  const qb = document.getElementById('q-b-input').value;
+  const qc = document.getElementById('q-c-input').value;
+  const qd = document.getElementById('q-d-input').value;
+  if (!qa || !qb || !qc || !qd) { alert('Fill all options'); return; }
+  const options = [qa, qb, qc, qd];
+  const selectedLetter = document.getElementById('q-ans-input').value;
   const correctIndex = ['A','B','C','D'].indexOf(selectedLetter);
   const correctText = options[correctIndex];
+  const token2 = localStorage.getItem('laesulia_token');
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure/' + tHuntId + '/questions', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token2},
     body: JSON.stringify({
-      question: document.getElementById('q-text').value,
+      question: document.getElementById('q-text-input').value,
       options: options,
       correct_answer: correctText,
-      clue_after: document.getElementById('q-clue').value,
-      clue_lat: parseFloat(document.getElementById('q-lat').value) || null,
-      clue_lng: parseFloat(document.getElementById('q-lng').value) || null,
+      clue_after: document.getElementById('q-clue-input').value,
+      clue_lat: qCloneLat,
+      clue_lng: qCloneLng,
       order_num: 1,
-      difficulty: document.getElementById('q-diff').value
+      difficulty: document.getElementById('q-diff-input').value
     })
   });
-  if (await res.json()) {
+  const data = await res.json();
+  if (data?.id) {
     alert('Question added!');
-    document.getElementById('q-text').value = '';
-    ['q-a','q-b','q-c','q-d','q-clue','q-lat','q-lng'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('q-text-input').value = '';
+    ['q-a-input','q-b-input','q-c-input','q-d-input','q-clue-input'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    qCloneLat = null;
+    qCloneLng = null;
+    if (qMarker) qMap.removeLayer(qMarker);
+    document.getElementById('q-coords-display').textContent = '📍 Click map';
   }
 }
+
 
 function launchHunt() {
   alert('Hunt is live! Field workers can now play it.');
