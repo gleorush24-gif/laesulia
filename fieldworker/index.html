@@ -532,7 +532,7 @@ function initNavMap() {
   const el = document.getElementById('nav-map');
   if (!el) return;
 
-  navMap = L.map('nav-map', {zoomControl: true}).setView([-9.4313, 160.0521], 14);
+  navMap = L.map('nav-map').setView([-9.4313, 160.0521], 14);
   
   // Google satellite + streets toggle
   var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
