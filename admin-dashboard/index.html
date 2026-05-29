@@ -347,7 +347,7 @@ async function createBounty() {
   const type = document.getElementById('b-type').value;
   if (!title || !lat || !lng) { toast('⚠️ Title and map pin are required'); return; }
   const data = await api('/bounties', { method:'POST', body: JSON.stringify({title, description:desc, lat, lng, reward_sbd:reward, submit_type:type}) });
-  const data = await res.json(); if (data?.id) {
+  if (data?.id) {
     toast('🎯 Bounty pin dropped!');
     document.getElementById('b-title').value = '';
     document.getElementById('b-desc').value = '';
