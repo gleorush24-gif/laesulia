@@ -267,7 +267,7 @@ function navigate(view) {
     if (mel) mel.classList.toggle('active', v === view);
   });
   document.getElementById('content').innerHTML = '<div class="loading">Loading…</div>';
-  const views = { dashboard: renderDashboard, bounties: renderBounties, submissions: renderSubmissions, approved: renderApproved, locations: renderLocations };
+  const views = { dashboard: renderDashboard, bounties: renderBounties, submissions: renderSubmissions, approved: renderApproved, locations: renderLocations, treasure: showTreasureTab };
   if (views[view]) views[view]();
 }
 
