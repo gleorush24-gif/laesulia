@@ -736,6 +736,16 @@ let qCloneLng = null;
 function showAddQuestions() {
   let html = '<div style="background:white;border-radius:12px;padding:20px;margin-top:20px;border:3px solid #7c3aed">';
   html += '<h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:#7c3aed">Add Questions</h3>';
+  html += '<div style="background:#f0fdf4;border:2px solid #10b981;border-radius:8px;padding:12px;margin-bottom:16px">';
+  html += '<h4 style="font-size:14px;font-weight:700;color:#10b981;margin-bottom:8px">📚 Load Sample Questions</h4>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">';
+  html += '<select id="q-subject" style="padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px"><option value="">Subject</option><option value="Science">Science</option><option value="Math">Math</option><option value="History">History</option><option value="Social Studies">Social</option><option value="Computers">Computers</option></select>';
+  html += '<select id="q-source" style="padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px"><option value="si">SI Database</option><option value="opentrivia">Open Trivia</option></select>';
+  html += '<button onclick="loadSampleQuestions()" style="padding:8px;background:#10b981;color:white;border:none;border-radius:6px;font-weight:700;cursor:pointer;font-size:12px">Load</button>';
+  html += '</div>';
+  html += '<div id="q-samples" style="max-height:200px;overflow-y:auto;background:white;border-radius:6px;padding:8px"></div>';
+  html += '</div>';
+  html += '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;margin-top:12px">Or Enter Manually</h4>';
   html += '<input type="text" id="q-text-input" placeholder="Question" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px">';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
   html += '<input type="text" id="q-a-input" placeholder="A" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px">';
