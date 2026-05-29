@@ -547,15 +547,18 @@ async function createTreasureHunt() {
   const contact = document.getElementById('t-contact').value;
   if (!title) { alert('Enter title'); return; }
   
+  const token = localStorage.getItem('token');
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure', {
     method: 'POST',
+    headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
     body: JSON.stringify({
       title, description: '', prize_description: 'Prize', prize_value_sbd: sbd,
       shop_name: shop, shop_contact: contact, lat: tLat, lng: tLng
     })
   });
   
-  const data = await res.json(); if (data?.id) {
+  const data = await res.json();
+  if (data?.id) {
     alert('Hunt created!');
     document.getElementById('t-title').value = '';
     document.getElementById('t-sbd').value = '';
@@ -565,13 +568,16 @@ async function createTreasureHunt() {
 }
 
 async function loadTreasureHunts() {
-  const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure'); const data = await res.json();
-  const hunts = data?.hunts || [];
-  let html = '';
-  hunts.forEach(h => {
-    html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:8px"><div style="font-weight:700">' + h.title + '</div><div style="font-size:13px;color:#94a3b8">$' + h.prize_value_sbd + ' SBD at ' + h.shop_name + '</div></div>';
-  });
-  document.getElementById('t-hunts').innerHTML = html || 'No hunts';
+  try {
+    const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure');
+    const data = await res.json();
+    const hunts = data?.hunts || [];
+    let html = '';
+    hunts.forEach(h => {
+      html += '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:8px"><div style="font-weight:700">' + h.title + '</div><div style="font-size:13px;color:#94a3b8">$' + h.prize_value_sbd + ' SBD at ' + h.shop_name + '</div></div>';
+    });
+    document.getElementById('t-hunts').innerHTML = html || 'No hunts';
+  } catch (e) { console.error(e); }
 }
 
 // Add tab nav
