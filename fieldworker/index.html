@@ -136,7 +136,8 @@
     @media (min-width: 641px) {
       .wallet-chip { display:flex; }
     }
-  </style>
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}} @keyframes ping{0%{transform:scale(1);opacity:0.8}100%{transform:scale(2);opacity:0}}
+</style>
 </head>
 <body>
 
@@ -742,7 +743,12 @@ function stopNavTracking() {
 }
 
 
+
 // ── Treasure Hunt Tab ─────────────────────────────────────────────────────────
+let tMap = null;
+let tMarker = null;
+let tTrail = [];
+let tTrailLine = null;
 let currentHunt = null;
 let currentAttempt = null;
 let currentQuestions = [];
@@ -752,12 +758,12 @@ async function renderTreasure() {
   const data = await apiFetch('/treasure');
   const hunts = data?.hunts || [];
   if (!hunts.length) {
-    document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center"><div style="text-align:center;color:white"><div style="font-size:64px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;margin-top:12px">No Active Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px">Check back soon!</div></div></div>';
+    document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center"><div style="text-align:center;color:white"><div style="font-size:64px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;margin-top:12px">No Active Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px">Check back soon!</div></div></div>';
     return;
   }
-  let html = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:24px 16px 16px;text-align:center"><div style="font-size:48px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;color:white;margin-top:8px">Treasure Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">Answer clues. Find the treasure. Win prizes!</div></div><div style="padding:16px;max-width:600px;margin:0 auto">';
+  let html = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:24px 16px 16px;text-align:center"><div style="font-size:48px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;color:white;margin-top:8px">Treasure Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">Answer clues. Find the treasure. Win prizes!</div></div><div style="padding:16px;max-width:600px;margin:0 auto">';
   hunts.forEach(h => {
-    html += '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1)"><div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase">Active Hunt</div><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:white;margin-top:4px">' + h.title + '</div></div><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;text-align:center"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:white">$' + h.prize_value_sbd + '</div><div style="font-size:10px;color:rgba(255,255,255,0.7)">SBD Prize</div></div></div><div style="padding:16px"><p style="font-size:14px;color:#475569;margin-bottom:12px">' + (h.description||'') + '</p><div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">🎁 Prize</div><div style="font-size:14px;font-weight:600">' + (h.prize_description||'Special prize!') + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">📍 Collect at: ' + (h.shop_name||'TBA') + '</div></div><button data-hid="' + h.id + '" data-htitle="' + h.title.replace(/"/g,'') + '" data-hmax="' + h.max_finalists + '" onclick="startHunt(this.dataset.hid,this.dataset.htitle,this.dataset.hmax)" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Start Hunt! 🏴‍☠️</button></div></div>';
+    html += '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1)"><div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase">Active Hunt</div><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:white;margin-top:4px">' + h.title + '</div></div><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;text-align:center"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:white">$' + h.prize_value_sbd + '</div><div style="font-size:10px;color:rgba(255,255,255,0.7)">SBD Prize</div></div></div><div style="padding:16px"><p style="font-size:14px;color:#475569;margin-bottom:12px">' + (h.description||'') + '</p><div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">Prize</div><div style="font-size:14px;font-weight:600">' + (h.prize_description||'Special prize!') + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">Collect at: ' + (h.shop_name||'TBA') + '</div></div><button data-hid="' + h.id + '" data-htitle="' + h.title.replace(/"/g,'') + '" data-hmax="' + h.max_finalists + '" onclick="startHunt(this.dataset.hid,this.dataset.htitle,this.dataset.hmax)" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Start Hunt!</button></div></div>';
   });
   html += '</div>';
   document.getElementById('content').innerHTML = html;
@@ -766,69 +772,170 @@ async function renderTreasure() {
 async function startHunt(huntId, huntTitle, maxFinalists) {
   const attempt = await apiFetch('/treasure/' + huntId + '/start', {method:'POST'});
   if (!attempt) return;
-  if (attempt.status === 'eliminated') { showTreasureMsg('😔 Eliminated', 'All finalist spots taken. Better luck next time!', '#dc2626'); return; }
-  if (attempt.status === 'finalist') { showWinnerScreen(huntTitle); return; }
   if (attempt.status === 'winner') { showWinnerScreen(huntTitle); return; }
   const qData = await apiFetch('/treasure/' + huntId + '/questions');
   currentQuestions = qData?.questions || [];
   currentHunt = {id: huntId, title: huntTitle, maxFinalists};
-  currentAttempt = attempt;
-  if (!currentQuestions.length) { showTreasureMsg('⚠️ No Questions', 'This hunt has no questions yet!', '#d97706'); return; }
-  showQuestion(attempt.current_question);
+  currentAttempt = {current_question: attempt.current_question};
+  if (!currentQuestions.length) { toast('No questions yet!'); return; }
+  showMapQuestion(attempt.current_question);
 }
 
-function showQuestion(qi) {
-  if (qi >= currentQuestions.length) { showFinalistScreen(currentHunt.id, currentHunt.title); return; }
+function showMapQuestion(qi) {
+  if (qi >= currentQuestions.length) { showWinnerScreen(currentHunt.title); return; }
   const q = currentQuestions[qi];
-  const progress = (qi / currentQuestions.length) * 100;
-  const diffEmoji = q.difficulty==='easy'?'🟢':q.difficulty==='medium'?'🟡':'🔴';
-  let opts = q.options.map((o,i) => '<button data-hid="' + currentHunt.id + '" data-qid="' + q.id + '" data-ans="' + o.replace(/"/g,'') + '" onclick="submitAns(this.dataset.hid,this.dataset.qid,this.dataset.ans,this)" style="width:100%;padding:14px;margin-bottom:10px;background:white;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;text-align:left"><span style="display:inline-block;width:28px;height:28px;background:#f1f5f9;border-radius:50%;text-align:center;line-height:28px;font-size:13px;font-weight:700;margin-right:10px">' + String.fromCharCode(65+i) + '</span>' + o + '</button>').join('');
-  document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:20px 16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><button onclick="renderTreasure()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:6px 12px;color:white;font-family:Outfit,sans-serif;cursor:pointer;font-size:13px">← Back</button><span style="color:rgba(255,255,255,0.7);font-size:13px">Q' + (qi+1) + ' of ' + currentQuestions.length + '</span><span style="font-size:12px;font-weight:700;padding:4px 8px;border-radius:20px;background:rgba(255,255,255,0.15);color:white">' + diffEmoji + ' ' + q.difficulty + '</span></div><div style="background:rgba(255,255,255,0.1);border-radius:8px;height:6px;overflow:hidden"><div style="background:#7c3aed;height:100%;border-radius:8px;width:' + progress + '%"></div></div></div><div style="padding:20px 16px;max-width:600px;margin:0 auto"><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:#1e293b;margin-bottom:20px;line-height:1.4">' + q.question + '</div>' + opts + '<div id="ans-result" style="margin-top:12px"></div></div>';
+
+  // Build full screen map + question overlay
+  document.getElementById('content').innerHTML = `
+    <div style="position:relative;height:calc(100vh - 54px);overflow:hidden">
+      <div id="tmap" style="width:100%;height:100%"></div>
+      
+      <!-- Progress bar at top -->
+      <div style="position:absolute;top:0;left:0;right:0;z-index:500;padding:12px 16px;background:linear-gradient(to bottom,rgba(10,22,40,0.8),transparent)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <button onclick="renderTreasure()" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;padding:6px 12px;color:white;font-family:Outfit,sans-serif;cursor:pointer;font-size:13px;backdrop-filter:blur(4px)">Back</button>
+          <span style="color:white;font-size:13px;font-weight:600;background:rgba(0,0,0,0.3);padding:4px 12px;border-radius:20px;backdrop-filter:blur(4px)">Question ${qi+1} of ${currentQuestions.length}</span>
+          <span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(124,58,237,0.8);color:white;backdrop-filter:blur(4px)">${q.difficulty === 'easy' ? 'Easy' : q.difficulty === 'medium' ? 'Medium' : 'Hard'}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:4px;height:4px;overflow:hidden">
+          <div style="background:#7c3aed;height:100%;border-radius:4px;width:${(qi/currentQuestions.length)*100}%;transition:width 0.5s"></div>
+        </div>
+      </div>
+
+      <!-- Question card slides up from bottom -->
+      <div id="question-card" style="position:absolute;bottom:0;left:0;right:0;z-index:500;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1)">
+        <div style="background:white;border-radius:20px 20px 0 0;padding:20px 16px 32px;box-shadow:0 -8px 32px rgba(0,0,0,0.2)">
+          <div style="width:40px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 16px"></div>
+          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;color:#1e293b;margin-bottom:16px;line-height:1.4">${q.question}</div>
+          <div id="options-container">
+            ${q.options.map((o,i) => `<button data-hid="${currentHunt.id}" data-qid="${q.id}" data-ans="${o.replace(/"/g,'')}" data-cluelat="${q.clue_lat||''}" data-cluelng="${q.clue_lng||''}" data-clue="${(q.clue_after||'').replace(/"/g,'')}" data-qi="${qi}" onclick="submitTreasureAns(this)" style="width:100%;padding:13px 14px;margin-bottom:10px;background:white;border:2px solid #e2e8f0;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.15s"><span style="display:inline-block;width:26px;height:26px;background:#f1f5f9;border-radius:50%;text-align:center;line-height:26px;font-size:12px;font-weight:700;margin-right:10px">${String.fromCharCode(65+i)}</span>${o}</button>`).join('')}
+          </div>
+          <div id="ans-feedback" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>`;
+
+  // Init map
+  setTimeout(() => {
+    const el = document.getElementById('tmap');
+    if (!el) return;
+    if (tMap) { tMap.remove(); tMap = null; }
+    
+    // Start at Honiara for Q1, or at previous clue location
+    const startLat = qi === 0 ? -9.4313 : (currentQuestions[qi-1].clue_lat || -9.4313);
+    const startLng = qi === 0 ? 160.0521 : (currentQuestions[qi-1].clue_lng || 160.0521);
+    
+    tMap = L.map('tmap', {zoomControl:false}).setView([startLat, startLng], 14);
+    L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21}).addTo(tMap);
+
+    // Show trail of previous clue markers
+    tTrail.forEach((pt, i) => {
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="background:#7c3aed;color:white;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)">' + (i+1) + '</div>',
+        iconSize: [28,28], iconAnchor: [14,14]
+      });
+      L.marker(pt, {icon}).addTo(tMap);
+    });
+
+    // Draw trail line
+    if (tTrail.length > 1) {
+      L.polyline(tTrail, {color:'#7c3aed', weight:3, opacity:0.7, dashArray:'8,4'}).addTo(tMap);
+    }
+
+    // Show question marker with pulse
+    const qIcon = L.divIcon({
+      className: '',
+      html: '<div style="position:relative"><div style="background:#7c3aed;color:white;border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.4);animation:pulse 2s infinite">?</div><div style="position:absolute;top:-4px;left:-4px;width:52px;height:52px;border-radius:50%;background:rgba(124,58,237,0.3);animation:ping 2s infinite"></div></div>',
+      iconSize: [44,44], iconAnchor: [22,22]
+    });
+    L.marker([startLat, startLng], {icon: qIcon}).addTo(tMap);
+
+    // Slide up question card
+    setTimeout(() => {
+      const card = document.getElementById('question-card');
+      if (card) card.style.transform = 'translateY(0)';
+    }, 300);
+
+  }, 100);
 }
 
-async function submitAns(huntId, qId, answer, btn) {
-  document.querySelectorAll('[onclick^="submitAns"]').forEach(b => b.disabled = true);
-  btn.style.background = '#f1f5f9';
-  const data = await apiFetch('/treasure/' + huntId + '/answer', {method:'POST', body: JSON.stringify({question_id:qId, answer:answer})});
+async function submitTreasureAns(btn) {
+  const huntId = btn.dataset.hid;
+  const qId = btn.dataset.qid;
+  const answer = btn.dataset.ans;
+  const clueLat = parseFloat(btn.dataset.cluelat);
+  const clueLng = parseFloat(btn.dataset.cluelng);
+  const clue = btn.dataset.clue;
+  const qi = parseInt(btn.dataset.qi);
+
+  document.querySelectorAll('#options-container button').forEach(b => b.disabled = true);
+
+  const data = await apiFetch('/treasure/' + huntId + '/answer', {
+    method: 'POST',
+    body: JSON.stringify({question_id: qId, answer: answer})
+  });
   if (!data) return;
-  const res = document.getElementById('ans-result');
+
+  const feedback = document.getElementById('ans-feedback');
+
   if (data.correct) {
-    btn.style.background = '#dcfce7'; btn.style.borderColor = '#16a34a'; btn.style.color = '#166534';
-    if (data.finalist) {
-      res.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:16px;text-align:center"><div style="font-size:32px">🏆</div><div style="font-weight:700;color:#166534;font-size:16px;margin-top:8px">You are a FINALIST!</div></div>';
-      setTimeout(() => showFinalistScreen(huntId, currentHunt.title), 2000);
-    } else if (data.eliminated) {
-      res.innerHTML = '<div style="background:#fee2e2;border-radius:12px;padding:16px;text-align:center"><div style="font-size:32px">😔</div><div style="font-weight:700;color:#991b1b">All finalist spots taken!</div></div>';
-    } else {
-      res.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:14px"><div style="font-weight:700;color:#166534;margin-bottom:6px">✅ Correct!</div><div style="font-size:14px;color:#166534">🗺️ Clue: ' + (data.clue||'') + '</div>' + (data.clue_lat ? '<div style="font-size:12px;color:#166534;margin-top:4px">📍 ' + parseFloat(data.clue_lat).toFixed(4) + ', ' + parseFloat(data.clue_lng).toFixed(4) + '</div>' : '') + '</div>';
-      currentAttempt.current_question++;
-      setTimeout(() => showQuestion(currentAttempt.current_question), 2500);
+    btn.style.background = '#dcfce7';
+    btn.style.borderColor = '#16a34a';
+    btn.style.color = '#166534';
+
+    if (data.winner) {
+      feedback.innerHTML = '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🏆</div><div style="font-weight:700;color:#92400e;margin-top:6px">You found the treasure!</div></div>';
+      setTimeout(() => showWinnerScreen(currentHunt.title), 2000);
+      return;
     }
+
+    // Add to trail
+    const prevLat = qi === 0 ? -9.4313 : (currentQuestions[qi-1].clue_lat || -9.4313);
+    const prevLng = qi === 0 ? 160.0521 : (currentQuestions[qi-1].clue_lng || 160.0521);
+    tTrail.push([prevLat, prevLng]);
+
+    feedback.innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:14px"><div style="font-weight:700;color:#166534;margin-bottom:4px">Correct!</div><div style="font-size:13px;color:#166534">Clue: ' + clue + '</div></div>';
+
+    // Animate map to next clue location
+    if (tMap && clueLat && clueLng) {
+      setTimeout(() => {
+        // Slide down question card
+        const card = document.getElementById('question-card');
+        if (card) card.style.transform = 'translateY(100%)';
+        // Fly map to next location
+        tMap.flyTo([clueLat, clueLng], 16, {duration: 2});
+        setTimeout(() => {
+          currentAttempt.current_question = qi + 1;
+          showMapQuestion(qi + 1);
+        }, 2500);
+      }, 1500);
+    } else {
+      setTimeout(() => { currentAttempt.current_question = qi + 1; showMapQuestion(qi + 1); }, 2000);
+    }
+
   } else {
-    btn.style.background = '#fee2e2'; btn.style.borderColor = '#dc2626'; btn.style.color = '#991b1b';
-    res.innerHTML = '<div style="background:#fee2e2;border-radius:12px;padding:12px;text-align:center;color:#991b1b;font-weight:600">❌ Wrong! Try again.</div>';
-    setTimeout(() => { document.querySelectorAll('[onclick^="submitAns"]').forEach(b => { b.disabled=false; b.style.background='white'; b.style.borderColor='#e2e8f0'; b.style.color='#1e293b'; }); res.innerHTML=''; }, 1500);
+    btn.style.background = '#fee2e2';
+    btn.style.borderColor = '#dc2626';
+    btn.style.color = '#991b1b';
+    feedback.innerHTML = '<div style="background:#fee2e2;border-radius:12px;padding:12px;text-align:center;color:#991b1b;font-weight:600">Wrong answer! Try again.</div>';
+    setTimeout(() => {
+      document.querySelectorAll('#options-container button').forEach(b => { b.disabled=false; b.style.background='white'; b.style.borderColor='#e2e8f0'; b.style.color='#1e293b'; });
+      feedback.innerHTML = '';
+    }, 1500);
   }
 }
 
-async function showFinalistScreen(huntId, huntTitle) {
-  const data = await apiFetch('/treasure/' + huntId + '/finalists');
-  const finalists = data?.finalists || [];
-  document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:32px 20px;text-align:center;color:white"><div style="font-size:56px">🏆</div><div style="font-family:Fraunces,serif;font-size:26px;font-weight:700;margin-top:12px">You made the Finals!</div><div style="color:rgba(255,255,255,0.7);font-size:14px;margin-top:6px">' + huntTitle + '</div></div><div style="padding:20px 16px;max-width:600px;margin:0 auto"><div style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #e2e8f0"><div style="font-size:16px;font-weight:700;margin-bottom:12px">🎲 Final Challenge — Lucky Bet!</div><p style="font-size:14px;color:#475569;margin-bottom:16px">Place your bet on the sports result. If you are right, you advance!</p><div style="font-weight:700;font-size:15px;margin-bottom:12px">🏉 State of Origin 2026</div><button onclick="placeBet(' + JSON.stringify(huntId) + ',' + JSON.stringify('Queensland Maroons') + ')" style="width:100%;padding:14px;margin-bottom:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🟣 Queensland Maroons</button><button onclick="placeBet(' + JSON.stringify(huntId) + ',' + JSON.stringify('NSW Blues') + ')" style="width:100%;padding:14px;background:linear-gradient(135deg,#0066cc,#0044aa);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">🔵 NSW Blues</button></div><div style="background:#f8fafc;border-radius:12px;padding:16px"><div style="font-weight:700;margin-bottom:10px">👥 Finalists (' + finalists.length + ')</div>' + finalists.map((f,i) => '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e2e8f0"><span style="font-size:18px">' + ['🥇','🥈','🥉','4️⃣','5️⃣'][i] + '</span><span style="font-weight:600">' + f.username + '</span></div>').join('') + '</div></div>';
-}
-
-async function placeBet(huntId, option) {
-  const data = await apiFetch('/treasure/' + huntId + '/bet', {method:'POST', body: JSON.stringify({bet_option:option})});
-  if (data?.message) toast('🎲 Bet placed on ' + option + '! Waiting for result…');
-}
-
 function showWinnerScreen(huntTitle) {
-  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);background:linear-gradient(135deg,#d97706,#b45309);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center;color:white"><div style="font-size:80px">🏆</div><div style="font-family:Fraunces,serif;font-size:32px;font-weight:700;margin-top:16px">YOU WON!</div><div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px">' + huntTitle + '</div><div style="background:rgba(255,255,255,0.2);border-radius:16px;padding:20px;margin-top:24px"><div style="font-size:14px">Go collect your prize at the shop!</div><div style="font-size:13px;color:rgba(255,255,255,0.6);margin-top:4px">Show this screen to the shop owner</div></div></div></div>';
+  if (tMap) { tMap.remove(); tMap = null; }
+  tTrail = [];
+  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);background:linear-gradient(135deg,#d97706,#b45309);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center;color:white"><div style="font-size:80px">&#x1F3C6;</div><div style="font-family:Fraunces,serif;font-size:36px;font-weight:700;margin-top:16px">YOU WON!</div><div style="font-size:16px;color:rgba(255,255,255,0.8);margin-top:8px">' + huntTitle + '</div><div style="background:rgba(255,255,255,0.2);border-radius:16px;padding:20px;margin-top:24px"><div style="font-size:15px;font-weight:600">Go collect your prize at the shop!</div><div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:6px">Show this screen to the shop owner</div></div><button onclick="renderTreasure()" style="margin-top:24px;padding:12px 28px;background:rgba(255,255,255,0.2);color:white;border:2px solid rgba(255,255,255,0.4);border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to Hunts</button></div></div>';
 }
 
 function showTreasureMsg(title, msg, color) {
-  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">🏴\u200d☠️</div><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:' + color + '">' + title + '</div><div style="font-size:14px;color:#475569;margin-top:8px;max-width:280px;margin:8px auto 0">' + msg + '</div><button onclick="renderTreasure()" style="margin-top:20px;padding:12px 24px;background:' + color + ';color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to Hunts</button></div></div>';
+  document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:' + color + '">' + title + '</div><div style="font-size:14px;color:#475569;margin-top:8px;max-width:280px;margin:8px auto 0">' + msg + '</div><button onclick="renderTreasure()" style="margin-top:20px;padding:12px 24px;background:' + color + ';color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to Hunts</button></div></div>';
 }
+
 
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
 </script>
