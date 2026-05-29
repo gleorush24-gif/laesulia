@@ -767,7 +767,7 @@ async function startHunt(huntId, huntTitle, maxFinalists) {
   const attempt = await apiFetch('/treasure/' + huntId + '/start', {method:'POST'});
   if (!attempt) return;
   if (attempt.status === 'eliminated') { showTreasureMsg('😔 Eliminated', 'All finalist spots taken. Better luck next time!', '#dc2626'); return; }
-  if (attempt.status === 'finalist') { showFinalistScreen(huntId, huntTitle); return; }
+  if (attempt.status === 'finalist') { showWinnerScreen(huntTitle); return; }
   if (attempt.status === 'winner') { showWinnerScreen(huntTitle); return; }
   const qData = await apiFetch('/treasure/' + huntId + '/questions');
   currentQuestions = qData?.questions || [];
