@@ -137,6 +137,7 @@
       .wallet-chip { display:flex; }
     }
   @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}} @keyframes ping{0%{transform:scale(1);opacity:0.8}100%{transform:scale(2);opacity:0}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}} @keyframes ping{0%{transform:scale(1);opacity:0.8}100%{transform:scale(2);opacity:0}}
 </style>
 </head>
 <body>
@@ -744,6 +745,7 @@ function stopNavTracking() {
 
 
 
+
 // ── Treasure Hunt Tab ─────────────────────────────────────────────────────────
 let tMap = null;
 let tMarker = null;
@@ -935,6 +937,7 @@ function showWinnerScreen(huntTitle) {
 function showTreasureMsg(title, msg, color) {
   document.getElementById('content').innerHTML = '<div style="min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center;padding:24px"><div style="text-align:center"><div style="font-size:48px;margin-bottom:16px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:' + color + '">' + title + '</div><div style="font-size:14px;color:#475569;margin-top:8px;max-width:280px;margin:8px auto 0">' + msg + '</div><button onclick="renderTreasure()" style="margin-top:20px;padding:12px 24px;background:' + color + ';color:white;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Back to Hunts</button></div></div>';
 }
+
 
 
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
