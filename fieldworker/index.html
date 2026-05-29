@@ -176,6 +176,7 @@
       <button class="nav-link active" id="nav-map" onclick="navigate('map')">🗺️ Map</button>
       <button class="nav-link" id="nav-bounties" onclick="navigate('bounties')">🎯 Bounties</button>
       <button class="nav-link" id="nav-wallet" onclick="navigate('wallet')">💰 Wallet</button>
+      <button class="nav-link" id="nav-navigate" onclick="navigate('navigate')">🧭 Navigate</button>
       <button class="nav-link" id="nav-profile" onclick="navigate('profile')">👤 Profile</button>
     </div>
     <div class="navbar-right">
@@ -189,6 +190,7 @@
     <button class="mobile-nav-link" id="mnav-map" onclick="navigate('map');toggleMenu()">🗺️ Map</button>
     <button class="mobile-nav-link" id="mnav-bounties" onclick="navigate('bounties');toggleMenu()">🎯 Bounties</button>
     <button class="mobile-nav-link" id="mnav-wallet" onclick="navigate('wallet');toggleMenu()">💰 Wallet</button>
+    <button class="mobile-nav-link" id="mnav-navigate" onclick="navigate('navigate');toggleMenu()">🧭 Navigate</button>
     <button class="mobile-nav-link" id="mnav-profile" onclick="navigate('profile');toggleMenu()">👤 Profile</button>
     <div class="mobile-footer">
       <span id="mobile-username" style="color:rgba(255,255,255,0.5);font-size:13px"></span>
@@ -283,7 +285,7 @@ async function apiFetch(path, options = {}) {
 
 function navigate(view) {
   currentView = view;
-  ['map','bounties','wallet','profile'].forEach(v => {
+  ['map','bounties','wallet','profile','navigate'].forEach(v => {
     const el = document.getElementById('nav-'+v);
     const mel = document.getElementById('mnav-'+v);
     if (el) el.classList.toggle('active', v === view);
@@ -293,6 +295,7 @@ function navigate(view) {
   else if (view === 'bounties') renderBounties();
   else if (view === 'wallet') renderWallet();
   else if (view === 'profile') renderProfile();
+  else if (view === 'navigate') renderNavigate();
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
@@ -391,7 +394,7 @@ function renderUploadScreen() {
       ${uploadedFiles.length < required ? `<button class="add-photo-btn" onclick="document.getElementById('file-input').click()">📷 Add Photo (${uploadedFiles.length}/${required})</button>` : ''}
       ${uploadedFiles.length >= required ? `<button class="bounty-btn submit" onclick="submitBounty()" id="submit-btn">✅ Submit for Review — $${b.reward} SBD</button>` : ''}
     </div>`;
-  ['map','bounties','wallet','profile'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
+  ['map','bounties','wallet','profile','navigate'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
 }
 
 async function handleFileSelect(e) {
@@ -468,6 +471,271 @@ function renderProfile() {
       <div class="menu-item" onclick="navigate('bounties')"><div class="menu-item-left"><div class="menu-icon" style="background:#dbeafe">🎯</div>My Bounties</div><span style="color:#94a3b8">›</span></div>
       <div class="menu-item" onclick="logout()" style="margin-top:20px"><div class="menu-item-left" style="color:#dc2626"><div class="menu-icon" style="background:#fee2e2">🚪</div>Sign Out</div></div>
     </div>`;
+}
+
+// ── Navigate Tab ──────────────────────────────────────────────────────────────
+let navMap = null;
+let navUserMarker = null;
+let navDestMarker = null;
+let navRouteLine = null;
+let navTrailLine = null;
+let navTrailPoints = [];
+let navWatchId = null;
+let navUserPos = null;
+
+function renderNavigate() {
+  document.getElementById('content').innerHTML = `
+    <div style="position:relative">
+      <div id="nav-map" style="height:calc(100vh - 54px);width:100%"></div>
+      
+      <!-- Status bar -->
+      <div id="nav-status" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(10,22,40,0.9);color:white;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;backdrop-filter:blur(8px);white-space:nowrap">
+        📍 Getting your location…
+      </div>
+
+      <!-- Destination info -->
+      <div id="nav-dest-info" style="display:none;position:absolute;bottom:80px;left:16px;right:16px;z-index:1000;background:white;border-radius:16px;padding:16px;box-shadow:0 4px 20px rgba(0,0,0,0.15)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Destination</div>
+            <div id="nav-dest-coords" style="font-size:14px;font-weight:700;margin-top:2px"></div>
+          </div>
+          <div id="nav-distance" style="text-align:right">
+            <div style="font-size:24px;font-weight:700;color:#0066cc;font-family:'Fraunces',serif"></div>
+            <div style="font-size:11px;color:#94a3b8"></div>
+          </div>
+        </div>
+        <button onclick="clearNavDestination()" style="margin-top:10px;width:100%;padding:8px;background:#f1f5f9;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;color:#475569">✕ Clear Destination</button>
+      </div>
+
+      <!-- Instruction banner -->
+      <div id="nav-instruction" style="position:absolute;bottom:16px;left:16px;right:16px;z-index:1000;background:#0066cc;color:white;border-radius:16px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;display:none">
+        Tap anywhere on the map to set destination
+      </div>
+
+      <!-- Tap hint -->
+      <div id="nav-tap-hint" style="position:absolute;bottom:16px;left:16px;right:16px;z-index:1000;background:#0066cc;color:white;border-radius:16px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center">
+        Tap anywhere on the map to set destination 📍
+      </div>
+    </div>`;
+
+  setTimeout(initNavMap, 300);
+}
+
+function initNavMap() {
+  if (typeof L === 'undefined') { setTimeout(initNavMap, 200); return; }
+  const el = document.getElementById('nav-map');
+  if (!el) return;
+
+  navMap = L.map('nav-map', {zoomControl: true}).setView([-9.4313, 160.0521], 14);
+  
+  // Google satellite + streets toggle
+  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  satellite.addTo(navMap);
+  L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets}, {}, {position:'topright'}).addTo(navMap);
+
+  // Start watching user position
+  startNavTracking();
+
+  // Tap to set destination
+  navMap.on('click', function(e) {
+    setNavDestination(e.latlng.lat, e.latlng.lng);
+  });
+}
+
+function startNavTracking() {
+  if (!navigator.geolocation) {
+    document.getElementById('nav-status').textContent = '❌ GPS not available';
+    return;
+  }
+
+  navWatchId = navigator.geolocation.watchPosition(
+    function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const heading = pos.coords.heading;
+      const accuracy = pos.coords.accuracy;
+      
+      navUserPos = {lat, lng};
+      updateNavUserMarker(lat, lng, heading);
+      
+      // Add to trail
+      navTrailPoints.push([lat, lng]);
+      if (navTrailPoints.length > 1) {
+        if (navTrailLine) navMap.removeLayer(navTrailLine);
+        navTrailLine = L.polyline(navTrailPoints, {
+          color: '#0066cc',
+          weight: 3,
+          opacity: 0.7,
+          dashArray: '8,4'
+        }).addTo(navMap);
+      }
+
+      // Update status
+      const acc = Math.round(accuracy);
+      document.getElementById('nav-status').innerHTML = `📍 Tracking — ±${acc}m accuracy`;
+      
+      // Update distance if destination set
+      if (navDestMarker) {
+        updateNavDistance(lat, lng);
+        drawRoute(lat, lng);
+      }
+
+      // Center map on user
+      if (navTrailPoints.length <= 2) {
+        navMap.setView([lat, lng], 16);
+      }
+    },
+    function(err) {
+      document.getElementById('nav-status').textContent = '❌ GPS error: ' + err.message;
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 10000
+    }
+  );
+}
+
+function updateNavUserMarker(lat, lng, heading) {
+  // Create rotating triangle SVG
+  const rotation = heading || 0;
+  const svgIcon = L.divIcon({
+    className: '',
+    html: `<div style="transform:rotate(${rotation}deg);transition:transform 0.3s">
+      <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="14" fill="rgba(0,102,204,0.15)" stroke="#0066cc" stroke-width="2"/>
+        <polygon points="16,4 24,26 16,21 8,26" fill="#0066cc" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    </div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+
+  if (navUserMarker) {
+    navUserMarker.setLatLng([lat, lng]);
+    navUserMarker.setIcon(svgIcon);
+  } else {
+    navUserMarker = L.marker([lat, lng], {icon: svgIcon, zIndexOffset: 1000}).addTo(navMap);
+  }
+}
+
+function setNavDestination(lat, lng) {
+  // Remove old destination marker
+  if (navDestMarker) navMap.removeLayer(navDestMarker);
+  
+  // Red pin marker
+  const destIcon = L.divIcon({
+    className: '',
+    html: `<div style="text-align:center">
+      <div style="background:#dc2626;color:white;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap;margin-bottom:2px">📍 Destination</div>
+      <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #dc2626;margin:0 auto"></div>
+    </div>`,
+    iconSize: [80, 36],
+    iconAnchor: [40, 36]
+  });
+
+  navDestMarker = L.marker([lat, lng], {icon: destIcon}).addTo(navMap);
+
+  // Show destination info
+  document.getElementById('nav-tap-hint').style.display = 'none';
+  document.getElementById('nav-dest-info').style.display = 'block';
+  document.getElementById('nav-dest-coords').textContent = lat.toFixed(5) + ', ' + lng.toFixed(5);
+
+  // Draw route if we have user position
+  if (navUserPos) {
+    updateNavDistance(navUserPos.lat, navUserPos.lng);
+    drawRoute(navUserPos.lat, navUserPos.lng);
+  }
+
+  // Fit map to show both points
+  if (navUserPos) {
+    const bounds = L.latLngBounds(
+      [navUserPos.lat, navUserPos.lng],
+      [lat, lng]
+    );
+    navMap.fitBounds(bounds, {padding: [60, 60]});
+  }
+}
+
+async function drawRoute(fromLat, fromLng) {
+  if (!navDestMarker) return;
+  const dest = navDestMarker.getLatLng();
+  
+  try {
+    // Use OSRM free routing
+    const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.code === 'Ok' && data.routes.length > 0) {
+      const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      
+      if (navRouteLine) navMap.removeLayer(navRouteLine);
+      navRouteLine = L.polyline(coords, {
+        color: '#0066cc',
+        weight: 5,
+        opacity: 0.8
+      }).addTo(navMap);
+
+      // Update distance from route
+      const distMeters = data.routes[0].distance;
+      const durationSecs = data.routes[0].duration;
+      updateNavDistanceFromRoute(distMeters, durationSecs);
+    }
+  } catch(e) {
+    // OSRM failed - just draw straight line
+    if (navRouteLine) navMap.removeLayer(navRouteLine);
+    navRouteLine = L.polyline([[fromLat, fromLng], [navDestMarker.getLatLng().lat, navDestMarker.getLatLng().lng]], {
+      color: '#0066cc',
+      weight: 4,
+      opacity: 0.6,
+      dashArray: '10,8'
+    }).addTo(navMap);
+  }
+}
+
+function updateNavDistance(fromLat, fromLng) {
+  if (!navDestMarker) return;
+  const dest = navDestMarker.getLatLng();
+  const dist = getDistanceKm(fromLat, fromLng, dest.lat, dest.lng);
+  const distEl = document.getElementById('nav-distance');
+  if (dist < 1) {
+    distEl.innerHTML = `<div style="font-size:24px;font-weight:700;color:#0066cc;font-family:'Fraunces',serif">${Math.round(dist*1000)}m</div><div style="font-size:11px;color:#94a3b8">away</div>`;
+  } else {
+    distEl.innerHTML = `<div style="font-size:24px;font-weight:700;color:#0066cc;font-family:'Fraunces',serif">${dist.toFixed(1)}km</div><div style="font-size:11px;color:#94a3b8">away</div>`;
+  }
+}
+
+function updateNavDistanceFromRoute(meters, seconds) {
+  const distEl = document.getElementById('nav-distance');
+  const mins = Math.round(seconds / 60);
+  const dist = meters < 1000 ? Math.round(meters) + 'm' : (meters/1000).toFixed(1) + 'km';
+  const time = mins < 60 ? mins + ' min' : Math.floor(mins/60) + 'h ' + (mins%60) + 'm';
+  distEl.innerHTML = `<div style="font-size:22px;font-weight:700;color:#0066cc;font-family:'Fraunces',serif">${dist}</div><div style="font-size:11px;color:#94a3b8">${time} drive</div>`;
+}
+
+function getDistanceKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function clearNavDestination() {
+  if (navDestMarker) { navMap.removeLayer(navDestMarker); navDestMarker = null; }
+  if (navRouteLine) { navMap.removeLayer(navRouteLine); navRouteLine = null; }
+  document.getElementById('nav-dest-info').style.display = 'none';
+  document.getElementById('nav-tap-hint').style.display = 'block';
+}
+
+function stopNavTracking() {
+  if (navWatchId !== null) {
+    navigator.geolocation.clearWatch(navWatchId);
+    navWatchId = null;
+  }
 }
 
 function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000); }
