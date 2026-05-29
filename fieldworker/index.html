@@ -758,7 +758,8 @@ let currentQuestions = [];
 async function renderTreasure() {
   document.getElementById('content').innerHTML = '<div style="padding:32px;text-align:center;color:#94a3b8">Loading...</div>';
   const data = await apiFetch('/treasure');
-  const hunts = data?.hunts || [];
+  const allHunts = data?.hunts || [];
+  const hunts = allHunts.filter(h => h.status === 'active').slice(0, 2);
   if (!hunts.length) {
     document.getElementById('content').innerHTML = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);min-height:calc(100vh - 54px);display:flex;align-items:center;justify-content:center"><div style="text-align:center;color:white"><div style="font-size:64px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;margin-top:12px">No Active Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:14px;margin-top:6px">Check back soon!</div></div></div>';
     return;
