@@ -54,11 +54,7 @@ func main() {
 	// Public bounties — anyone can see open bounty pins
 	bounty := handlers.NewBountyHandler(db)
 	treasure := handlers.NewTreasureHandler(db)
-	treasure := handlers.NewTreasureHandler(db)
-	treasure := handlers.NewTreasureHandler(db)
 	r.GET("/api/v1/bounties", bounty.List)
-	r.GET("/api/v1/treasure", treasure.List)
-	r.GET("/api/v1/treasure", treasure.List)
 	r.GET("/api/v1/treasure", treasure.List)
 
 	// Protected — must be logged in
@@ -72,7 +68,6 @@ func main() {
 
 		// Bounties
 		bounty := handlers.NewBountyHandler(db)
-	treasure := handlers.NewTreasureHandler(db)
 
 		api.POST("/bounties/:id/claim", bounty.Claim)
 		api.POST("/bounties/:id/submit", bounty.Submit)
