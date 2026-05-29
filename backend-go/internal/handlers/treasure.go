@@ -359,3 +359,21 @@ func (h *TreasureHandler) ResetAttempt(c *gin.Context) {
 	h.db.Exec(`UPDATE treasure_hunts SET status='active', winner_id=NULL WHERE id::text=$1`, huntID)
 	c.JSON(http.StatusOK, gin.H{"message": "Attempt reset!"})
 }
+
+
+// Delete hunt (admin only)
+func (h *TreasureHandler) Delete(c *gin.Context) {
+	userID := c.GetString("user_id")
+	var isAdmin bool
+	h.db.QueryRow("SELECT is_admin FROM users WHERE id::text=$1", userID).Scan(&isAdmin)
+	if !isAdmin {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admins only"})
+		return
+	}
+	huntID := c.Param("id")
+	h.db.Exec(`DELETE FROM treasure_bets WHERE hunt_id::text=$1`, huntID)
+	h.db.Exec(`DELETE FROM treasure_attempts WHERE hunt_id::text=$1`, huntID)
+	h.db.Exec(`DELETE FROM treasure_questions WHERE hunt_id::text=$1`, huntID)
+	h.db.Exec(`DELETE FROM treasure_hunts WHERE id::text=$1`, huntID)
+	c.JSON(http.StatusOK, gin.H{"message": "Hunt deleted!"})
+}
