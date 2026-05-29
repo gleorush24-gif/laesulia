@@ -31,6 +31,7 @@ func main() {
 	database.MigrateBase64(db)
 	database.MigrateAdmin(db)
 	database.MigratePhone(db)
+	database.MigrateTreasure(db)
 
 	r := gin.Default()
 	r.Use(middleware.CORS())
@@ -52,7 +53,13 @@ func main() {
 	r.GET("/api/v1/locations/:id", loc.Get)
 	// Public bounties — anyone can see open bounty pins
 	bounty := handlers.NewBountyHandler(db)
+	treasure := handlers.NewTreasureHandler(db)
+	treasure := handlers.NewTreasureHandler(db)
+	treasure := handlers.NewTreasureHandler(db)
 	r.GET("/api/v1/bounties", bounty.List)
+	r.GET("/api/v1/treasure", treasure.List)
+	r.GET("/api/v1/treasure", treasure.List)
+	r.GET("/api/v1/treasure", treasure.List)
 
 	// Protected — must be logged in
 	api := r.Group("/api/v1", middleware.Auth())
@@ -65,6 +72,7 @@ func main() {
 
 		// Bounties
 		bounty := handlers.NewBountyHandler(db)
+	treasure := handlers.NewTreasureHandler(db)
 
 		api.POST("/bounties/:id/claim", bounty.Claim)
 		api.POST("/bounties/:id/submit", bounty.Submit)
@@ -77,6 +85,15 @@ func main() {
 		api.DELETE("/bounties/:id", bounty.Delete)
 		api.GET("/admin/bounties/submitted", bounty.GetSubmitted)
 		api.GET("/admin/bounties/:id/files", bounty.GetFiles)
+                api.POST("/treasure", treasure.Create)
+                api.POST("/treasure/:id/questions", treasure.AddQuestion)
+                api.GET("/treasure/:id/questions", treasure.GetQuestions)
+                api.POST("/treasure/:id/start", treasure.StartAttempt)
+                api.POST("/treasure/:id/answer", treasure.SubmitAnswer)
+                api.POST("/treasure/:id/bet", treasure.SubmitBet)
+                api.POST("/treasure/:id/resolve-bet", treasure.ResolveBet)
+                api.GET("/treasure/:id/finalists", treasure.GetFinalists)
+                api.POST("/treasure/:id/winner", treasure.DeclareWinner)
 	}
 
 	port := os.Getenv("PORT")

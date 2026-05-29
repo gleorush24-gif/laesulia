@@ -174,3 +174,59 @@ func MigratePhone(db *sql.DB) error {
 	return nil
 }
 
+
+func MigrateTreasure(db *sql.DB) error {
+	stmts := []string{
+		`CREATE TABLE IF NOT EXISTS treasure_hunts (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			title TEXT NOT NULL,
+			description TEXT,
+			prize_description TEXT,
+			prize_value_sbd FLOAT DEFAULT 0,
+			shop_name TEXT,
+			shop_contact TEXT,
+			lat FLOAT NOT NULL,
+			lng FLOAT NOT NULL,
+			status TEXT DEFAULT 'active',
+			winner_id UUID REFERENCES users(id),
+			max_finalists INT DEFAULT 5,
+			created_by UUID REFERENCES users(id),
+			created_at TIMESTAMP DEFAULT NOW()
+		)`,
+		`CREATE TABLE IF NOT EXISTS treasure_questions (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			hunt_id UUID REFERENCES treasure_hunts(id) ON DELETE CASCADE,
+			question TEXT NOT NULL,
+			options JSONB NOT NULL,
+			correct_answer TEXT NOT NULL,
+			clue_after TEXT,
+			clue_lat FLOAT,
+			clue_lng FLOAT,
+			order_num INT NOT NULL,
+			difficulty TEXT DEFAULT 'medium'
+		)`,
+		`CREATE TABLE IF NOT EXISTS treasure_attempts (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			hunt_id UUID REFERENCES treasure_hunts(id),
+			user_id UUID REFERENCES users(id),
+			current_question INT DEFAULT 0,
+			status TEXT DEFAULT 'playing',
+			started_at TIMESTAMP DEFAULT NOW(),
+			completed_at TIMESTAMP,
+			UNIQUE(hunt_id, user_id)
+		)`,
+		`CREATE TABLE IF NOT EXISTS treasure_bets (
+			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			hunt_id UUID REFERENCES treasure_hunts(id),
+			user_id UUID REFERENCES users(id),
+			bet_option TEXT NOT NULL,
+			is_correct BOOLEAN,
+			created_at TIMESTAMP DEFAULT NOW(),
+			UNIQUE(hunt_id, user_id)
+		)`,
+	}
+	for _, stmt := range stmts {
+		db.Exec(stmt)
+	}
+	return nil
+}
