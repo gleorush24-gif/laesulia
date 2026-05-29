@@ -630,13 +630,17 @@ function showAddQuestions() {
 async function addQuestion() {
   if (!tHuntId) { alert('Create hunt first'); return; }
   const token = localStorage.getItem('laesulia_token');
+  const options = [document.getElementById('q-a').value, document.getElementById('q-b').value, document.getElementById('q-c').value, document.getElementById('q-d').value];
+  const selectedLetter = document.getElementById('q-ans').value;
+  const correctIndex = ['A','B','C','D'].indexOf(selectedLetter);
+  const correctText = options[correctIndex];
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure/' + tHuntId + '/questions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
     body: JSON.stringify({
       question: document.getElementById('q-text').value,
-      options: [document.getElementById('q-a').value, document.getElementById('q-b').value, document.getElementById('q-c').value, document.getElementById('q-d').value],
-      correct_answer: document.getElementById('q-ans').value,
+      options: options,
+      correct_answer: correctText,
       clue_after: document.getElementById('q-clue').value,
       clue_lat: parseFloat(document.getElementById('q-lat').value) || null,
       clue_lng: parseFloat(document.getElementById('q-lng').value) || null,
