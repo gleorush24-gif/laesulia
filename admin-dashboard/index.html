@@ -572,7 +572,7 @@ function initTMap() {
 
 async function createTreasureHunt() {
   if (!tLat || !tLng) { alert('Drop pin on map'); return; }
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('laesulia_token');
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure', {
     method: 'POST',
     headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
@@ -629,7 +629,7 @@ function showAddQuestions() {
 
 async function addQuestion() {
   if (!tHuntId) { alert('Create hunt first'); return; }
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('laesulia_token');
   const res = await fetch('https://laesulia-api.onrender.com/api/v1/treasure/' + tHuntId + '/questions', {
     method: 'POST',
     headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
