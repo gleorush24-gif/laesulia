@@ -221,8 +221,8 @@ function selectQuestion(i) {
   <div class="login-card">
     <div class="login-logo">🗺️ Laesulia</div>
     <div class="login-sub">"<span>to follow</span>" — Toobaita, Malaita · Admin</div>
-    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="admin@laesulia.app" autocomplete="off"></div>
-    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="off" onkeyup="if(event.key==='Enter')login()"></div>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="admin@laesulia.app" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')" onkeyup="if(event.key==='Enter')login()"></div>
     <div id="login-error"></div>
     <button class="btn-login" onclick="login()">Sign In</button>
   </div>
