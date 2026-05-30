@@ -73,6 +73,7 @@ func (h *TreasureHandler) List(c *gin.Context) {
 		PrizeDescription string    `json:"prize_description"`
 		PrizeValueSBD    float64   `json:"prize_value_sbd"`
 		ShopName         string    `json:"shop_name"`
+		ShopContact      string    `json:"shop_contact"`
 		Lat              float64   `json:"lat"`
 		Lng              float64   `json:"lng"`
 		Status           string    `json:"status"`
