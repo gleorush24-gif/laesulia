@@ -751,18 +751,15 @@ function showAddQuestions() {
   html += '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;margin-top:12px">Or Enter Manually</h4>';
   html += '<input type="text" id="q-text-input" placeholder="Question (use LaTeX e.g. \\int_0^1 x^2\\,dx)" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px" oninput="previewMath()">';
   html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\int\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫∫</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\int\\int\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫∫∫</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\frac{}{}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">a/b</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\sqrt{}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">√</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\sin')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">sin</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\cos')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">cos</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\tan')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">tan</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\pi')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">π</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\theta')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">θ</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\sum_{i=0}^{n}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">Σ</button>';
-  html += '<button type="button" onclick="insertMath('q-text-input','\\lim_{x\\to\\infty}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">lim</button>';
+  var btns = [
+    ['∫','\\int'],['∫∫','\\int\\int'],['∫∫∫','\\int\\int\\int'],
+    ['a/b','\\frac{}{}'],['√','\\sqrt{}'],['sin','\\sin'],
+    ['cos','\\cos'],['tan','\\tan'],['π','\\pi'],
+    ['θ','\\theta'],['Σ','\\sum_{i=0}^{n}'],['lim','\\lim_{x\\to\\infty}']
+  ];
+  btns.forEach(function(b) {
+    html += '<button type="button" onclick="insertMath(\'q-text-input\',' + JSON.stringify(b[1]) + ')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">' + b[0] + '</button>';
+  });
   html += '</div>';
   html += '<div id="math-preview" style="min-height:36px;background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:10px;font-size:16px"></div>';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
