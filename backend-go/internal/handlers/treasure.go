@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -113,12 +114,8 @@ func (h *TreasureHandler) AddQuestion(c *gin.Context) {
 		return
 	}
 	if req.Difficulty == "" { req.Difficulty = "medium" }
-	optionsJSON := "["
-	for i, o := range req.Options {
-		if i > 0 { optionsJSON += "," }
-		optionsJSON += `"` + o + `"`
-	}
-	optionsJSON += "]"
+	optionsBytes, _ := json.Marshal(req.Options)
+	optionsJSON := string(optionsBytes)
 	id := uuid.New().String()
 	_, err := h.db.Exec(`
 		INSERT INTO treasure_questions (id, hunt_id, question, options, correct_answer, clue_after, clue_lat, clue_lng, order_num, difficulty)
