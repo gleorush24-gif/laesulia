@@ -59,7 +59,7 @@ func (h *TreasureHandler) Create(c *gin.Context) {
 // List all active treasure hunts
 func (h *TreasureHandler) List(c *gin.Context) {
 	rows, err := h.db.Query(`
-		SELECT id, title, description, prize_description, prize_value_sbd, shop_name, lat, lng, status, max_finalists, created_at
+		SELECT id, title, description, prize_description, prize_value_sbd, shop_name, COALESCE(shop_contact,''), lat, lng, status, max_finalists, created_at
 		FROM treasure_hunts WHERE status='active' ORDER BY created_at DESC`)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Query failed"})
@@ -83,7 +83,7 @@ func (h *TreasureHandler) List(c *gin.Context) {
 	for rows.Next() {
 		var h Hunt
 		rows.Scan(&h.ID, &h.Title, &h.Description, &h.PrizeDescription, &h.PrizeValueSBD,
-			&h.ShopName, &h.Lat, &h.Lng, &h.Status, &h.MaxFinalists, &h.CreatedAt)
+			&h.ShopName, &h.ShopContact, &h.Lat, &h.Lng, &h.Status, &h.MaxFinalists, &h.CreatedAt)
 		hunts = append(hunts, h)
 	}
 	c.JSON(http.StatusOK, gin.H{"hunts": hunts})
