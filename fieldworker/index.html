@@ -780,16 +780,16 @@ async function renderTreasure() {
   }
   let html = '<div style="background:linear-gradient(135deg,#0a1628,#1a3a5c);padding:24px 16px 16px;text-align:center"><div style="font-size:48px">&#x1F3F4;</div><div style="font-family:Fraunces,serif;font-size:24px;font-weight:700;color:white;margin-top:8px">Treasure Hunts</div><div style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:4px">Answer clues. Find the treasure. Win prizes!</div></div><div style="padding:16px;max-width:600px;margin:0 auto">';
   hunts.forEach(h => {
-    html += '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1)"><div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase">Active Hunt</div><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:white;margin-top:4px">' + h.title + '</div></div><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;text-align:center"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:white">$' + h.prize_value_sbd + '</div><div style="font-size:10px;color:rgba(255,255,255,0.7)">SBD Prize</div></div></div><div style="padding:16px"><p style="font-size:14px;color:#475569;margin-bottom:12px">' + (h.description||'') + '</p><div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">Prize</div><div style="font-size:14px;font-weight:600">' + (h.prize_description||'Special prize!') + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">Collect at: ' + (h.shop_name||'TBA') + '</div></div><button data-hid="' + h.id + '" data-htitle="' + h.title.replace(/"/g,'') + '" data-hmax="' + h.max_finalists + '" data-shop="' + (h.shop_name||'').replace(/"/g,'') + '" data-contact="' + (h.shop_contact||'').replace(/"/g,'') + '" data-prize="' + (h.prize_description||'').replace(/"/g,'') + '" onclick="startHunt(this.dataset.hid,this.dataset.htitle,this.dataset.hmax,this.dataset.shop,this.dataset.contact,this.dataset.prize)" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Start Hunt!</button></div></div>';
+    html += '<div style="background:white;border-radius:16px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,0.1)"><div style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:20px;display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase">Active Hunt</div><div style="font-family:Fraunces,serif;font-size:20px;font-weight:700;color:white;margin-top:4px">' + h.title + '</div></div><div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;text-align:center"><div style="font-family:Fraunces,serif;font-size:22px;font-weight:700;color:white">$' + h.prize_value_sbd + '</div><div style="font-size:10px;color:rgba(255,255,255,0.7)">SBD Prize</div></div></div><div style="padding:16px"><p style="font-size:14px;color:#475569;margin-bottom:12px">' + (h.description||'') + '</p><div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px"><div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">Prize</div><div style="font-size:14px;font-weight:600">' + (h.prize_description||'Special prize!') + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">Collect at: ' + (h.shop_name||'TBA') + '</div></div><button data-hid="' + h.id + '" data-htitle="' + h.title.replace(/"/g,'') + '" data-hmax="' + h.max_finalists + '" data-hlat="' + h.lat + '" data-hlng="' + h.lng + '" data-shop=""' + (h.shop_name||'').replace(/"/g,'') + '" data-contact="' + (h.shop_contact||'').replace(/"/g,'') + '" data-prize="' + (h.prize_description||'').replace(/"/g,'') + '" onclick="startHunt(this.dataset.hid,this.dataset.htitle,this.dataset.hmax,this.dataset.shop,this.dataset.contact,this.dataset.prize,this.dataset.hlat,this.dataset.hlng)" style="width:100%;padding:14px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Start Hunt!</button></div></div>';
   });
   html += '</div>';
   document.getElementById('content').innerHTML = html;
 }
 
-async function startHunt(huntId, huntTitle, maxFinalists, shopName, shopContact, prize) {
+async function startHunt(huntId, huntTitle, maxFinalists, shopName, shopContact, prize, huntLat, huntLng) {
   const attempt = await apiFetch('/treasure/' + huntId + '/start', {method:'POST'});
   if (!attempt) return;
-  currentHunt = {id: huntId, title: huntTitle, maxFinalists, shop_name: shopName, shop_contact: shopContact, prize_description: prize};
+  currentHunt = {id: huntId, title: huntTitle, maxFinalists, shop_name: shopName, shop_contact: shopContact, prize_description: prize, lat: parseFloat(huntLat), lng: parseFloat(huntLng)};
   const qData = await apiFetch('/treasure/' + huntId + '/questions');
   currentQuestions = qData?.questions || [];
   if (attempt.status === 'winner') { showWinnerScreen(huntTitle, currentHunt, currentQuestions[currentQuestions.length-1]); return; }
@@ -821,11 +821,11 @@ function showMapQuestion(qi) {
 
       <!-- Question card slides up from bottom -->
       <div id="question-card" style="position:absolute;bottom:0;left:0;right:0;z-index:500;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1)">
-        <div style="background:white;border-radius:20px 20px 0 0;padding:20px 16px 32px;box-shadow:0 -8px 32px rgba(0,0,0,0.2)">
-          <div style="width:40px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 16px"></div>
-          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;color:#1e293b;margin-bottom:16px;line-height:1.4">${q.question}</div>
+        <div style="background:rgba(10,10,30,0.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:20px 20px 0 0;padding:20px 16px 32px;box-shadow:0 -8px 32px rgba(124,58,237,0.4);border:1px solid rgba(124,58,237,0.3)">
+          <div style="width:40px;height:4px;background:rgba(124,58,237,0.6);border-radius:2px;margin:0 auto 16px;box-shadow:0 0 8px rgba(124,58,237,0.8)"></div>
+          <div style="font-family:Fraunces,serif;font-size:18px;font-weight:700;color:#e0d7ff;margin-bottom:16px;line-height:1.4;text-shadow:0 0 20px rgba(167,139,250,0.5)">${q.question}</div>
           <div id="options-container">
-            ${q.options.map((o,i) => `<button data-hid="${currentHunt.id}" data-qid="${q.id}" data-ans="${o.replace(/"/g,'')}" data-cluelat="${q.clue_lat||''}" data-cluelng="${q.clue_lng||''}" data-clue="${(q.clue_after||'').replace(/"/g,'')}" data-qi="${qi}" onclick="submitTreasureAns(this)" style="width:100%;padding:13px 14px;margin-bottom:10px;background:white;border:2px solid #e2e8f0;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.15s"><span style="display:inline-block;width:26px;height:26px;background:#f1f5f9;border-radius:50%;text-align:center;line-height:26px;font-size:12px;font-weight:700;margin-right:10px">${String.fromCharCode(65+i)}</span>${o}</button>`).join('')}
+            ${q.options.map((o,i) => `<button data-hid="${currentHunt.id}" data-qid="${q.id}" data-ans="${o.replace(/"/g,'')}" data-cluelat="${q.clue_lat||''}" data-cluelng="${q.clue_lng||''}" data-clue="${(q.clue_after||'').replace(/"/g,'')}" data-qi="${qi}" onclick="submitTreasureAns(this)" style="width:100%;padding:13px 14px;margin-bottom:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(124,58,237,0.4);border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;text-align:left;transition:all 0.15s;color:white;backdrop-filter:blur(4px)"><span style="display:inline-block;width:26px;height:26px;background:rgba(124,58,237,0.5);border-radius:50%;text-align:center;line-height:26px;font-size:12px;font-weight:700;margin-right:10px;color:white;box-shadow:0 0 8px rgba(124,58,237,0.6)">${String.fromCharCode(65+i)}</span>${o}</button>`).join('')}
           </div>
           <div id="ans-feedback" style="margin-top:8px"></div>
         </div>
@@ -946,8 +946,8 @@ async function submitTreasureAns(btn) {
 function showWinnerScreen(huntTitle, hunt, lastQuestion) {
   if (tMap) { tMap.remove(); tMap = null; }
   tTrail = [];
-  const lat = lastQuestion ? lastQuestion.clue_lat : null;
-  const lng = lastQuestion ? lastQuestion.clue_lng : null;
+  const lat = hunt ? hunt.lat : (lastQuestion ? lastQuestion.clue_lat : null);
+  const lng = hunt ? hunt.lng : (lastQuestion ? lastQuestion.clue_lng : null);
   const shopName = hunt ? (hunt.shop_name || 'the shop') : 'the shop';
   const shopContact = hunt ? (hunt.shop_contact || '') : '';
   const prize = hunt ? (hunt.prize_description || 'Your prize') : 'Your prize';
