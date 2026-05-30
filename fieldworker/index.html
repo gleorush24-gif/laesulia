@@ -789,10 +789,10 @@ async function renderTreasure() {
 async function startHunt(huntId, huntTitle, maxFinalists, shopName, shopContact, prize) {
   const attempt = await apiFetch('/treasure/' + huntId + '/start', {method:'POST'});
   if (!attempt) return;
-  if (attempt.status === 'winner') { showWinnerScreen(huntTitle, currentHunt, currentQuestions[currentQuestions.length-1]); return; }
+  currentHunt = {id: huntId, title: huntTitle, maxFinalists, shop_name: shopName, shop_contact: shopContact, prize_description: prize};
   const qData = await apiFetch('/treasure/' + huntId + '/questions');
   currentQuestions = qData?.questions || [];
-  currentHunt = {id: huntId, title: huntTitle, maxFinalists, shop_name: shopName, shop_contact: shopContact, prize_description: prize};
+  if (attempt.status === 'winner') { showWinnerScreen(huntTitle, currentHunt, currentQuestions[currentQuestions.length-1]); return; }
   currentAttempt = {current_question: attempt.current_question};
   if (!currentQuestions.length) { toast('No questions yet!'); return; }
   showMapQuestion(attempt.current_question);
