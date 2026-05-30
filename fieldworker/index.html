@@ -904,6 +904,9 @@ async function submitTreasureAns(btn) {
     if (data.winner) {
       feedback.innerHTML = '<div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🏆</div><div style="font-weight:700;color:#92400e;margin-top:6px">You found the treasure!</div></div>';
       setTimeout(() => showWinnerScreen(currentHunt.title, currentHunt, currentQuestions[currentQuestions.length-1]), 2000);
+    } else if (data.finalist) {
+      feedback.innerHTML = '<div style="background:#f0f9ff;border:1px solid #7dd3fc;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">⏱️</div><div style="font-weight:700;color:#0369a1;margin-top:6px">You finished but someone beat you!</div><div style="font-size:13px;color:#0284c7;margin-top:4px">Better luck next time.</div></div>';
+      setTimeout(() => renderTreasure(), 3000);
       return;
     }
 

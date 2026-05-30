@@ -218,16 +218,18 @@ func (h *TreasureHandler) SubmitAnswer(c *gin.Context) {
 		var currentQ int
 		h.db.QueryRow(`SELECT current_question FROM treasure_attempts WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID).Scan(&currentQ)
 		if currentQ >= totalQ {
-			// Check if finalist spots available
-			var finalistCount int
-			var maxFinalists int
-			h.db.QueryRow(`SELECT COUNT(*) FROM treasure_attempts WHERE hunt_id::text=$1 AND status='finalist'`, huntID).Scan(&finalistCount)
-			h.db.QueryRow(`SELECT max_finalists FROM treasure_hunts WHERE id::text=$1`, huntID).Scan(&maxFinalists)
-			h.db.Exec(`UPDATE treasure_attempts SET status='winner', completed_at=NOW() WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID)
-			// Hunt stays active for others to play; only attempt is marked as winner
-			var winnerName string
-			h.db.QueryRow(`SELECT username FROM users WHERE id::text=$1`, userID).Scan(&winnerName)
-			c.JSON(http.StatusOK, gin.H{"correct": true, "winner": true, "message": "🏆 You answered all questions correctly! You are the winner!"})
+			// Check if anyone already won
+			var existingWinner string
+			h.db.QueryRow(`SELECT id FROM treasure_attempts WHERE hunt_id::text=$1 AND status='winner' LIMIT 1`, huntID).Scan(&existingWinner)
+			if existingWinner == "" {
+				// First to finish — winner!
+				h.db.Exec(`UPDATE treasure_attempts SET status='winner', completed_at=NOW() WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID)
+				c.JSON(http.StatusOK, gin.H{"correct": true, "winner": true, "message": "🏆 You are the first to finish! You are the winner!"})
+			} else {
+				// Someone already won — finalist
+				h.db.Exec(`UPDATE treasure_attempts SET status='finalist', completed_at=NOW() WHERE hunt_id::text=$1 AND user_id::text=$2`, huntID, userID)
+				c.JSON(http.StatusOK, gin.H{"correct": true, "finalist": true, "message": "⏱️ You finished but someone beat you! Better luck next time."})
+			}
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{
