@@ -160,11 +160,7 @@ func (h *TreasureHandler) GetQuestions(c *gin.Context) {
 		q.ClueAfter = clueAfter.String
 		q.ClueLat = clueLat.Float64
 		q.ClueLng = clueLng.Float64
-		// Parse options JSON manually
-		optionsJSON = optionsJSON[1:len(optionsJSON)-1]
-		for _, o := range splitJSON(optionsJSON) {
-			if len(o) > 2 { q.Options = append(q.Options, o[1:len(o)-1]) }
-		}
+		json.Unmarshal([]byte(optionsJSON), &q.Options)
 		questions = append(questions, q)
 	}
 	c.JSON(http.StatusOK, gin.H{"questions": questions})
