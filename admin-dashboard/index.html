@@ -211,6 +211,8 @@ function selectQuestion(i) {
     }
     .leaflet-container { z-index: 1 !important; }
 </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 </head>
 <body>
 
@@ -747,7 +749,22 @@ function showAddQuestions() {
   html += '<div id="q-samples" style="max-height:200px;overflow-y:auto;background:white;border-radius:6px;padding:8px"></div>';
   html += '</div>';
   html += '<h4 style="font-size:14px;font-weight:700;margin-bottom:8px;margin-top:12px">Or Enter Manually</h4>';
-  html += '<input type="text" id="q-text-input" placeholder="Question" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px">';
+  html += '<input type="text" id="q-text-input" placeholder="Question (use LaTeX e.g. \\int_0^1 x^2\\,dx)" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px" oninput="previewMath()">';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\int\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫∫</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\int\\int\\int')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">∫∫∫</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\frac{}{}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">a/b</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\sqrt{}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">√</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\sin')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">sin</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\cos')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">cos</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\tan')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">tan</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\pi')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">π</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\theta')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">θ</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\sum_{i=0}^{n}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">Σ</button>';
+  html += '<button type="button" onclick="insertMath('q-text-input','\\lim_{x\\to\\infty}')" style="padding:4px 8px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;cursor:pointer;font-size:12px">lim</button>';
+  html += '</div>';
+  html += '<div id="math-preview" style="min-height:36px;background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:10px;font-size:16px"></div>';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px">';
   html += '<input type="text" id="q-a-input" placeholder="A" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px">';
   html += '<input type="text" id="q-b-input" placeholder="B" style="padding:10px;border:1px solid #e2e8f0;border-radius:8px">';
@@ -826,6 +843,28 @@ async function addQuestion() {
   }
 }
 
+
+function insertMath(inputId, latex) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
+  el.value = el.value.substring(0, start) + latex + el.value.substring(end);
+  el.focus();
+  el.selectionStart = el.selectionEnd = start + latex.length;
+  previewMath();
+}
+
+function previewMath() {
+  const el = document.getElementById('q-text-input');
+  const preview = document.getElementById('math-preview');
+  if (!el || !preview) return;
+  try {
+    katex.render(el.value, preview, {throwOnError: false, displayMode: true});
+  } catch(e) {
+    preview.textContent = el.value;
+  }
+}
 
 function launchHunt() {
   alert('Hunt is live! Field workers can now play it.');
