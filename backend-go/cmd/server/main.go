@@ -80,7 +80,6 @@ func main() {
 		api.POST("/bounties/:id/submit", bounty.Submit)
 		api.POST("/bounties/:id/upload", bounty.UploadFile)
 		api.GET("/wallet", bounty.GetWallet)
-	api.POST("/questions/add", questions.AddSIQuestion)
 
 		// Admin bounty routes
 		api.POST("/bounties", bounty.Create)
