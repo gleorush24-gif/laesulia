@@ -489,6 +489,22 @@ let navWatchId = null;
 let navUserPos = null;
 
 function renderNavigate() {
+  document.getElementById('content').innerHTML = '<div id="nav-map" style="height:calc(100vh - 54px);width:100%"></div>';
+  setTimeout(initNavMap, 100);
+}
+function initNavMap() {
+  if (navMap) { navMap.remove(); navMap = null; }
+  navMap = L.map('nav-map').setView([-9.4313, 160.0521], 13);
+  var satellite = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  var streets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {attribution:'© Google', maxZoom:21, maxNativeZoom:21});
+  satellite.addTo(navMap);
+  L.control.layers({'🛰️ Satellite': satellite, '🗺️ Streets': streets}, {}, {position:'topright'}).addTo(navMap);
+  startNavTracking();
+  navMap.on('click', function(e) {
+    setNavDestination(e.latlng.lat, e.latlng.lng);
+  });
+}
+function oldRenderNavigate() {
   document.getElementById('content').innerHTML = `
     <div style="position:relative">
       <div id="nav-map" style="height:calc(100vh - 54px);width:100%"></div>
