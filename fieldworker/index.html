@@ -179,7 +179,6 @@
       <button class="nav-link" id="nav-bounties" onclick="navigate('bounties')">🎯 Bounties</button>
       <button class="nav-link" id="nav-treasure" onclick="navigate('treasure')">🏴 Treasure</button>
       <button class="nav-link" id="nav-wallet" onclick="navigate('wallet')">💰 Wallet</button>
-      <button class="nav-link" id="nav-navigate" onclick="navigate('navigate')">🧭 Navigate</button>
       <button class="nav-link" id="nav-profile" onclick="navigate('profile')">👤 Profile</button>
     </div>
     <div class="navbar-right">
@@ -194,7 +193,6 @@
     <button class="mobile-nav-link" id="mnav-bounties" onclick="navigate('bounties');toggleMenu()">🎯 Bounties</button>
     <button class="mobile-nav-link" id="mnav-treasure" onclick="navigate('treasure');toggleMenu()">🏴 Treasure</button>
     <button class="mobile-nav-link" id="mnav-wallet" onclick="navigate('wallet');toggleMenu()">💰 Wallet</button>
-    <button class="mobile-nav-link" id="mnav-navigate" onclick="navigate('navigate');toggleMenu()">🧭 Navigate</button>
     <button class="mobile-nav-link" id="mnav-profile" onclick="navigate('profile');toggleMenu()">👤 Profile</button>
     <div class="mobile-footer">
       <span id="mobile-username" style="color:rgba(255,255,255,0.5);font-size:13px"></span>
@@ -289,7 +287,7 @@ async function apiFetch(path, options = {}) {
 
 function navigate(view) {
   currentView = view;
-  ['map','bounties','wallet','profile','navigate','treasure'].forEach(v => {
+  ['map','bounties','wallet','profile','treasure'].forEach(v => {
     const el = document.getElementById('nav-'+v);
     const mel = document.getElementById('mnav-'+v);
     if (el) el.classList.toggle('active', v === view);
@@ -299,7 +297,7 @@ function navigate(view) {
   else if (view === 'bounties') renderBounties();
   else if (view === 'wallet') renderWallet();
   else if (view === 'profile') renderProfile();
-  else if (view === 'navigate') renderNavigate();
+
   else if (view === 'treasure') renderTreasure();
 }
 
@@ -399,7 +397,7 @@ function renderUploadScreen() {
       ${uploadedFiles.length < required ? `<button class="add-photo-btn" onclick="document.getElementById('file-input').click()">📷 Add Photo (${uploadedFiles.length}/${required})</button>` : ''}
       ${uploadedFiles.length >= required ? `<button class="bounty-btn submit" onclick="submitBounty()" id="submit-btn">✅ Submit for Review — $${b.reward} SBD</button>` : ''}
     </div>`;
-  ['map','bounties','wallet','profile','navigate','treasure'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
+  ['map','bounties','wallet','profile','treasure'].forEach(v => { const el = document.getElementById('nav-'+v); if (el) el.classList.remove('active'); });
 }
 
 async function handleFileSelect(e) {
