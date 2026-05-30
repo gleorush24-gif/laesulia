@@ -209,7 +209,8 @@ function selectQuestion(i) {
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .stat-card { padding: 14px; }
     }
-  </style>
+    .leaflet-container { z-index: 1 !important; }
+</style>
 </head>
 <body>
 
@@ -670,7 +671,7 @@ async function showTreasureTab() {
         </div>
         <button onclick="loadSampleQuestions()" style="width:100%;padding:10px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:700;cursor:pointer;margin-bottom:12px">📚 Load Questions</button>
       </div>
-      <div id="q-samples" style="background:#f0fdf4;border-radius:12px;padding:20px;border:2px solid #10b981;max-height:400px;overflow-y:auto"></div>
+      <div id="q-samples" style="background:#f0fdf4;border-radius:12px;padding:20px;border:2px solid #10b981;max-height:400px;overflow-y:auto"><div style="text-align:center;color:#94a3b8;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">📚</div><div style="font-size:14px;font-weight:600">Questions will appear here</div><div style="font-size:12px;margin-top:6px">Select a subject and click Load Questions</div></div></div>
     </div>
     <div style="background:white;border-radius:12px;padding:20px;margin-top:20px">
       <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Active Hunts</h3>
